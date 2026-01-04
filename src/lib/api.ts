@@ -1,6 +1,8 @@
 import { User, UserRole } from '@/types/user';
+import { Report } from '@/types/report';
+import { API_CONFIG } from '@/config/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const { baseUrl, endpoints } = API_CONFIG;
 
 interface ApiError {
   message: string;
@@ -43,7 +45,7 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers,
       });
@@ -76,7 +78,7 @@ class ApiClient {
     const result = await this.request<{
       user: User;
       token: string;
-    }>('/login', {
+    }>(endpoints.auth.login, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -101,7 +103,7 @@ class ApiClient {
     const result = await this.request<{
       user: User;
       token: string;
-    }>('/register', {
+    }>(endpoints.auth.register, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -114,7 +116,7 @@ class ApiClient {
   }
 
   async logout() {
-    const result = await this.request('/logout', {
+    const result = await this.request(endpoints.auth.logout, {
       method: 'POST',
     });
     this.setToken(null);
@@ -122,7 +124,7 @@ class ApiClient {
   }
 
   async getUser() {
-    return this.request<User>('/user');
+    return this.request<User>(endpoints.auth.user);
   }
 
   // Generic GET/POST methods for future use
@@ -136,9 +138,31 @@ class ApiClient {
       body: JSON.stringify(body),
     });
   }
+
+  // Report endpoints
+  async getTrainerReports(days: number = 7) {
+    return this.request<{
+      reports: Report[];
+      meta: {
+        days: number;
+        total: number;
+        newCount: number;
+      };
+    }>(`${endpoints.reports.trainer}?days=${days}`);
+  }
+
+  async getAllReports(days: number = 7) {
+    return this.request<{
+      reports: Report[];
+      meta: {
+        days: number;
+        total: number;
+        newCount: number;
+      };
+    }>(`${endpoints.reports.all}?days=${days}`);
+  }
 }
 
 export type { User } from '@/types/user';
 
 export const api = new ApiClient();
-

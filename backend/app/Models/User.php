@@ -25,6 +25,7 @@ class User extends Authenticatable
         'organization',
         'phone',
         'license_number',
+        'trainer_code',
     ];
 
     /**

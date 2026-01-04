@@ -4,13 +4,10 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import TrainerSidebar from "@/components/dashboard/TrainerSidebar";
 import TrainerMainContent from "@/components/dashboard/TrainerMainContent";
+import { TrainerDashboardPane } from "@/types/dashboard";
 
-export type TrainerDashboardPane = 
-  | "overview" 
-  | "horses"
-  | "stable"
-  | "analytics"
-  | "access-manager";
+// Re-export for backwards compatibility
+export type { TrainerDashboardPane } from "@/types/dashboard";
 
 const TrainerDashboard = () => {
   const [activePane, setActivePane] = useState<TrainerDashboardPane>("overview");
