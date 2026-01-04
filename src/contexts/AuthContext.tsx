@@ -1,91 +1,35 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createContext, useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+import { AuthContextType, AuthProviderProps, User, SignUpData } from '@/types/auth';
 
-interface AuthUser {
-  id: string;
-  email: string;
-  userType: 'track' | 'trainer' | 'vet';
-  name: string;
-  organization?: string;
-}
-
-interface AuthContextType {
-  user: AuthUser | null;
-  session: Session | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<void>;
-  signUp: (email: string, password: string, userData: Partial<AuthUser>) => Promise<{ error: AuthError | null }>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const token = api.getToken();
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUser = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setUser({
-          id: data.id,
-          email: data.email,
-          userType: data.user_type,
-          name: data.name,
-          organization: data.organization,
-        });
+      const { data, error } = await api.getUser();
+      if (error) {
+        api.setToken(null);
+        setUser(null);
+      } else if (data) {
+        setUser(data);
       }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+    } catch (err) {
+      console.error('Error fetching user:', err);
+      api.setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -93,62 +37,67 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error };
-    } catch (error) {
-      return { error: error as AuthError };
+      const { data, error } = await api.login(email, password);
+      
+      if (error) {
+        return { error };
+      }
+
+      if (data?.user) {
+        setUser(data.user);
+      }
+
+      return { error: null };
+    } catch (err) {
+      return {
+        error: {
+          message: err instanceof Error ? err.message : 'An unexpected error occurred',
+        },
+      };
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    try {
+      await api.logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+    }
   };
 
-  const signUp = async (email: string, password: string, userData: Partial<AuthUser>) => {
+  const signUp = async (email: string, password: string, userData: SignUpData) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await api.register({
+        name: userData.name,
         email,
         password,
-        options: {
-          data: {
-            user_type: userData.userType,
-            name: userData.name,
-            organization: userData.organization,
-          },
-        },
+        password_confirmation: password,
+        user_type: userData.userType,
+        organization: userData.organization,
       });
 
-      if (error) return { error };
+      if (error) {
+        return { error };
+      }
 
-      // Insert into public.users table
-      if (data.user) {
-        const { error: profileError } = await supabase.from('users').insert({
-          id: data.user.id,
-          email,
-          user_type: userData.userType!,
-          name: userData.name!,
-          organization: userData.organization,
-        });
-
-        if (profileError) {
-          return { error: profileError as unknown as AuthError };
-        }
+      if (data?.user) {
+        setUser(data.user);
       }
 
       return { error: null };
-    } catch (error) {
-      return { error: error as AuthError };
+    } catch (err) {
+      return {
+        error: {
+          message: err instanceof Error ? err.message : 'An unexpected error occurred',
+        },
+      };
     }
   };
 
   const value = {
     user,
-    session,
     loading,
     signIn,
     signOut,
@@ -157,4 +106,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

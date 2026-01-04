@@ -18,8 +18,13 @@ return [
     'paths' => ['*'],
 
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
+    //TODO: remove the localhost:8080 after testing/deployment
+    'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:8080'),
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:8080',
+    ],
 
     'allowed_origins_patterns' => [],
 
