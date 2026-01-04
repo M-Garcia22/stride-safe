@@ -1,0 +1,183 @@
+---
+alwaysApply: true
+---
+# StrideSafe Backend - Cursor Rules
+
+## Project Overview
+
+StrideSafe is a horse racing welfare monitoring platform with a Laravel API backend. The system has a **dual database architecture** that must be respected at all times.
+
+## Database Architecture (CRITICAL)
+
+### Two Separate Databases
+
+1. **`stridesafe_app`** (Primary/Default Connection: `mysql`)
+   - Purpose: Laravel application data (users, auth, app-specific tables)
+   - Access: Full read/write
+   - Tables: users, sessions, personal_access_tokens, cache, jobs, etc.
+   - Used for: Authentication, user management, app state
+
+2. **`stridesafe`** (Secondary Connection: `stridesafe`)
+   - Purpose: Production race/horse/stride data
+   - Access: **READ-ONLY** - Never write to this database
+   - Tables: horses, races, entries, strides, stride_data_v2, race_data, venues, etc.
+   - Contains: 10+ GB of historical race performance data
+
+### Connection Rules
+
+```php
+// App models (users, auth) - use default connection
+class User extends Model
+{
+    // No connection specified = uses 'mysql' (stridesafe_app)
+}
+
+// Race data models - MUST specify connection
+class Horse extends Model
+{
+    protected $connection = 'stridesafe';  // READ-ONLY
+}
+
+class Race extends Model
+{
+    protected $connection = 'stridesafe';  // READ-ONLY
+}
+```
+
+### Environment Variables
+
+```env
+# Primary - Laravel App (stridesafe_app)
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=stridesafe_app
+DB_USERNAME=mgarcia
+DB_PASSWORD=eLinkAdmin123!
+
+# Secondary - Race Data (stridesafe) - READ-ONLY
+STRIDESAFE_DB_HOST=127.0.0.1
+STRIDESAFE_DB_PORT=3306
+STRIDESAFE_DB_DATABASE=stridesafe
+STRIDESAFE_DB_USERNAME=mgarcia
+STRIDESAFE_DB_PASSWORD=eLinkAdmin123!
+```
+
+## User Roles
+
+Three user types with role-based access:
+
+1. **`track`** - Track officials, can view all horses/races at their venue
+2. **`trainer`** - Horse trainers, can view their own horses
+3. **`vet`** - Veterinarians, can view assigned horses and create examinations
+
+```php
+// User model has user_type enum
+$user->user_type; // 'track' | 'trainer' | 'vet'
+```
+
+## Key Database Tables
+
+### stridesafe_app (Laravel App)
+- `users` - id, name, email, password, user_type, organization, phone, license_number
+- `personal_access_tokens` - Sanctum API tokens
+- `sessions`, `cache`, `jobs` - Laravel system tables
+
+### stridesafe (Race Data - READ-ONLY)
+Core entities:
+- `horses` - id, name, sire, dam, breeder, DOB
+- `venues` - id, code, name, abbrev
+- `races` - id, meeting_id, condition_id, course_id, distance, local_start_time
+- `entries` - id, race_id, horse_id, tracker_id, official_position, official_time
+
+Performance data:
+- `strides` - Per-stride measurements (1.54 GB)
+- `stride_data_v2` - Enhanced stride data (5.33 GB)
+- `sectionals` - Race sectional times
+- `race_data` - Time-indexed race metrics
+- `race_data_v4` - Traffic light flags for injury risk indicators
+
+Key relationship: `entries.code` (entry_code) links to performance tables
+
+## API Structure
+
+Using Laravel Sanctum for API authentication:
+
+```php
+// Protected routes require Sanctum token
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', fn() => auth()->user());
+    Route::get('/horses', [HorseController::class, 'index']);
+});
+```
+
+## Frontend Integration
+
+The React frontend expects:
+- JWT/token-based auth via Sanctum
+- User object with: id, email, name, userType, organization
+- API endpoints for horses, races, welfare reports
+
+## SSH Tunnel Required for Local Development
+
+MySQL is bound to Docker network (172.17.0.1), so local dev requires SSH tunnel:
+
+```bash
+ssh -L 3306:172.17.0.1:3306 movetones@64.191.166.68
+```
+
+Keep tunnel open while developing locally.
+
+## Migration Safety Rules
+
+1. **NEVER run `migrate:fresh`** - This wipes all databases
+2. **ALWAYS use `--database=mysql`** flag to target specific database
+3. **ALWAYS use `--pretend`** first to preview changes
+4. Migrations only go to `stridesafe_app`, never to `stridesafe`
+
+```bash
+# Safe migration commands
+php artisan migrate --database=mysql --pretend  # Preview first
+php artisan migrate --database=mysql            # Run on app DB only
+```
+
+## Code Style
+
+- Follow Laravel conventions
+- Use type hints and return types
+- Models in `app/Models/`
+- Controllers in `app/Http/Controllers/Api/`
+- Form requests for validation
+- Resources for API responses
+
+## File Structure
+
+```
+backend/
+├── app/
+│   ├── Models/
+│   │   ├── User.php              # App DB (default)
+│   │   └── Stridesafe/           # Race data models
+│   │       ├── Horse.php         # connection = 'stridesafe'
+│   │       ├── Race.php
+│   │       ├── Entry.php
+│   │       └── Stride.php
+│   └── Http/
+│       └── Controllers/
+│           └── Api/
+├── config/
+│   └── database.php              # Dual connection config
+├── database/
+│   └── migrations/               # Only for stridesafe_app
+└── routes/
+    └── api.php
+```
+
+## Important Reminders
+
+1. Race data is READ-ONLY - never create migrations for stridesafe tables
+2. Always specify `protected $connection = 'stridesafe'` on race data models
+3. User authentication uses stridesafe_app database
+4. Frontend expects user_type for role-based routing
+5. SSH tunnel must be running for local database access
+
