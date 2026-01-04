@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\HorseController;
 use App\Http\Controllers\Api\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,4 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Reports - Track Officials
     Route::get('/reports/all', [ReportController::class, 'allReports']);
+    
+    // Horses - Trainer
+    Route::get('/horses/trainer', [HorseController::class, 'trainerHorses']);
 });

@@ -21,8 +21,9 @@ export const API_CONFIG = {
       all: '/reports/all',
     },
     
-    // Horses (future)
+    // Horses
     horses: {
+      trainer: '/horses/trainer',
       list: '/horses',
       detail: (id: number | string) => `/horses/${id}`,
     },

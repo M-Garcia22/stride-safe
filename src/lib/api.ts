@@ -1,5 +1,6 @@
 import { User, UserRole } from '@/types/user';
 import { Report } from '@/types/report';
+import { TrainerHorse } from '@/types/horse';
 import { API_CONFIG } from '@/config/api';
 
 const { baseUrl, endpoints } = API_CONFIG;
@@ -160,6 +161,17 @@ class ApiClient {
         newCount: number;
       };
     }>(`${endpoints.reports.all}?days=${days}`);
+  }
+
+  // Horse endpoints
+  async getTrainerHorses() {
+    return this.request<{
+      horses: TrainerHorse[];
+      meta: {
+        total: number;
+        trainerCode: string;
+      };
+    }>(endpoints.horses.trainer);
   }
 }
 
