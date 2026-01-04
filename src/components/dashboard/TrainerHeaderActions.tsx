@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Settings, LogOut, User, HelpCircle } from "lucide-react";
 import {
@@ -7,25 +6,40 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface TrainerHeaderActionsProps {
   onSettingsClick: () => void;
 }
 
 const TrainerHeaderActions = ({ onSettingsClick }: TrainerHeaderActionsProps) => {
-  const handleLogout = () => {
-    console.log("Logout clicked");
-    // Add logout logic here
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been successfully signed out.",
+    });
+    navigate("/");
   };
 
   const handleAccount = () => {
-    console.log("Account management clicked");
-    // Add account management logic here
+    toast({
+      title: "Coming Soon",
+      description: "Account management will be available in a future update.",
+    });
   };
 
   const handleHelp = () => {
-    console.log("Help clicked");
-    // Add help logic here
+    toast({
+      title: "Coming Soon",
+      description: "Help documentation will be available in a future update.",
+    });
   };
 
   return (
@@ -34,7 +48,7 @@ const TrainerHeaderActions = ({ onSettingsClick }: TrainerHeaderActionsProps) =>
         {/* Trainer Name */}
         <div className="flex items-center gap-3 mr-2">
           <div className="text-right">
-            <p className="text-sm font-medium text-foreground">Dale L. Romans</p>
+            <p className="text-sm font-medium text-foreground">{user?.name ?? "Trainer"}</p>
           </div>
         </div>
 

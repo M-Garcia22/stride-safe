@@ -9,6 +9,7 @@ import TrainerAccessManagerPane from "./panes/TrainerAccessManagerPane";
 import TrainerHorsesPane from "./panes/TrainerHorsesPane";
 import { useState } from "react";
 import { Report } from "@/types/report";
+import { useToast } from "@/hooks/use-toast";
 
 interface TrainerMainContentProps {
   activePane: TrainerDashboardPane;
@@ -18,6 +19,7 @@ interface TrainerMainContentProps {
 const TrainerMainContent = ({ activePane, onPaneChange }: TrainerMainContentProps) => {
   const [selectedHorse, setSelectedHorse] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const { toast } = useToast();
 
   const handleSelectHorse = (horseName: string) => {
     setSelectedHorse(horseName);
@@ -28,8 +30,10 @@ const TrainerMainContent = ({ activePane, onPaneChange }: TrainerMainContentProp
   };
 
   const handleSettingsClick = () => {
-    console.log("Settings clicked - could navigate to settings pane");
-    // Add settings navigation logic here if needed
+    toast({
+      title: "Coming Soon",
+      description: "Settings will be available in a future update.",
+    });
   };
 
   const renderPane = () => {
