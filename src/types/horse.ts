@@ -52,6 +52,7 @@ export interface TrainerHorse {
  */
 export interface HorseReport {
   id: number;
+  entryCode: number;
   date: string;
   track: string;
   raceNo: number;

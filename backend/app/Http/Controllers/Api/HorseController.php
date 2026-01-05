@@ -363,6 +363,7 @@ class HorseController extends Controller
     {
         return $entries->map(fn($entry) => [
             'id' => $entry->entry_id,
+            'entryCode' => $entry->entry_code,
             'date' => $entry->race_date,
             'track' => $entry->venue_abbrev ?? $entry->venue_name,
             'raceNo' => $entry->race_number,

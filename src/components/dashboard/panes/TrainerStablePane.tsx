@@ -26,7 +26,7 @@ const TrainerStablePane = ({
     if (onSelectReport && mostRecentReport) {
       const report: Report = {
         id: mostRecentReport.id,
-        entryCode: mostRecentReport.id,
+        entryCode: mostRecentReport.entryCode,
         date: mostRecentReport.date,
         track: mostRecentReport.track,
         raceNo: mostRecentReport.raceNo,
