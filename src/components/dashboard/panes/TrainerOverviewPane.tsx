@@ -6,7 +6,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { format } from "date-fns";
 import { getWellnessColor, getFatigueColor } from "@/lib/colorUtils";
 import { Report } from "@/types/report";
-import { TrainerPaneProps } from "@/types/dashboard";
+import { TrainerReportPaneProps } from "@/types/dashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useReports } from "@/hooks/useReports";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -14,16 +14,16 @@ import { Button } from "@/components/ui/button";
 
 const TrainerOverviewPane = ({
   onPaneChange,
-  onSelectHorse,
+  onSelectHorseName,
   onSelectReport
-}: TrainerPaneProps) => {
+}: TrainerReportPaneProps) => {
   const { user } = useAuth();
   const { reports, loading, error, newReportsCount, refetch } = useReports({ days: 7 });
   const firstName = user?.name?.split(' ')[0] || 'Trainer';
 
   const handleReportRowClick = (report: Report) => {
-    if (onSelectHorse) {
-      onSelectHorse(report.horseName);
+    if (onSelectHorseName) {
+      onSelectHorseName(report.horseName);
     }
     if (onSelectReport) {
       onSelectReport(report);

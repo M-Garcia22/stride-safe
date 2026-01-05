@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Share2 } from "lucide-react";
 import { Horse } from "@/types/horse";
@@ -14,11 +14,6 @@ const HorseBasicInfoCard = ({ horse }: HorseBasicInfoCardProps) => {
   const [showVetDialog, setShowVetDialog] = useState(false);
   const [currentHorse, setCurrentHorse] = useState<Horse>(horse);
 
-  const getMonthYear = (yearOfBirth: number) => {
-    // Assuming January for simplicity, in real implementation this would come from actual data
-    return `January ${yearOfBirth}`;
-  };
-
   const handleSaveVetSharing = (sharedVets: string[]) => {
     setCurrentHorse(prev => ({
       ...prev,
@@ -29,21 +24,28 @@ const HorseBasicInfoCard = ({ horse }: HorseBasicInfoCardProps) => {
 
   const hasSharedVets = currentHorse.sharedWithVets && currentHorse.sharedWithVets.length > 0;
 
+  // Only show color if it's not "Unknown"
+  const showColor = currentHorse.color && currentHorse.color !== "Unknown";
+
   return (
     <>
       <Card>
-        <CardHeader className="p-6">
+        <CardHeader className="p-4 pb-2">
           <div className="flex justify-between items-start">
             {/* Left side - Horse Details */}
-            <div className="space-y-2 flex-1">
+            <div className="space-y-1 flex-1">
               <div>
                 <CardTitle className="text-xl mb-1">{currentHorse.name}</CardTitle>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>{getMonthYear(currentHorse.yearOfBirth)}</span>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                  <span>{currentHorse.yearOfBirth}</span>
                   <span>•</span>
                   <span>{currentHorse.sex}</span>
-                  <span>•</span>
-                  <span>{currentHorse.color}</span>
+                  {showColor && (
+                    <>
+                      <span>•</span>
+                      <span>{currentHorse.color}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -69,6 +71,41 @@ const HorseBasicInfoCard = ({ horse }: HorseBasicInfoCardProps) => {
             </div>
           </div>
         </CardHeader>
+        <CardContent className="p-4 pt-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            {/* Pedigree */}
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Sire</p>
+              <p className="font-medium">{currentHorse.sire || "Unknown"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Dam</p>
+              <p className="font-medium">{currentHorse.dam || "Unknown"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Sire's Sire</p>
+              <p className="font-medium">{currentHorse.paternalGrandfather || "Unknown"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Dam's Sire</p>
+              <p className="font-medium">{currentHorse.maternalGrandfather || "Unknown"}</p>
+            </div>
+            
+            {/* Owner & Breeder */}
+            {(currentHorse.owner && currentHorse.owner !== "Unknown") && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-0.5">Owner</p>
+                <p className="font-medium truncate" title={currentHorse.owner}>{currentHorse.owner}</p>
+              </div>
+            )}
+            {(currentHorse.breeder && currentHorse.breeder !== "Unknown") && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-0.5">Breeder</p>
+                <p className="font-medium">{currentHorse.breeder}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
       <VetSharingDialog

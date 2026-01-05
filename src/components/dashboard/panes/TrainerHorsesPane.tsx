@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { getWellnessColor, getFatigueColor } from "@/lib/colorUtils";
 import { Report } from "@/types/report";
-import { TrainerHorse, HorseReport } from "@/types/horse";
+import { TrainerHorse } from "@/types/horse";
 import { TrainerPaneProps } from "@/types/dashboard";
 import { useTrainerHorses } from "@/hooks/useTrainerHorses";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -24,7 +24,7 @@ const TrainerHorsesPane = ({
     const mostRecentReport = horse.recentReports.find(r => r.welfareRiskCategory !== null);
     
     if (onSelectHorse) {
-      onSelectHorse(horse.name);
+      onSelectHorse(horse);
     }
     if (onSelectReport && mostRecentReport) {
       // Convert HorseReport to Report format

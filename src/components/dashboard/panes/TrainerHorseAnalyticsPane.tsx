@@ -1,146 +1,94 @@
 import { useState, useEffect } from "react";
-import { Horse } from "@/types/horse";
+import { TrainerHorse } from "@/types/horse";
 import { Report } from "@/types/report";
 import HorseBasicInfoCard from "@/components/dashboard/horse-analytics/HorseBasicInfoCard";
 import HorseAnalyticsTabs from "@/components/dashboard/horse-analytics/HorseAnalyticsTabs";
 import NoHorseSelected from "@/components/dashboard/horse-analytics/NoHorseSelected";
 import HorseSearchDialog from "@/components/dashboard/dialogs/HorseSearchDialog";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { TrainerDashboardPane } from "@/pages/TrainerDashboard";
+import { useTrainerHorses } from "@/hooks/useTrainerHorses";
+import { trainerHorseToAnalyticsHorse, createMinimalHorse } from "@/lib/horseMappers";
 
 interface TrainerHorseAnalyticsPaneProps {
   onPaneChange: (pane: TrainerDashboardPane) => void;
-  selectedHorse?: string | null;
+  selectedHorse?: TrainerHorse | null;
+  selectedHorseName?: string | null;
   selectedReport?: Report | null;
 }
 
-const TrainerHorseAnalyticsPane = ({ onPaneChange, selectedHorse: selectedHorseName, selectedReport }: TrainerHorseAnalyticsPaneProps) => {
-  // Mock horse data - in real app this would come from an API
-  const mockHorses: { [key: string]: Horse } = {
-    "Midnight Approval": {
-      id: "1",
-      name: "Midnight Approval",
-      yearOfBirth: 2022,
-      sex: "Colt",
-      color: "Bay",
-      wellnessScore: 88,
-      performanceScore: 92,
-      welfareAlert: false,
-      sire: "Sire Name",
-      dam: "Dam Name",
-      paternalGrandfather: "PG Father",
-      paternalGrandmother: "PG Mother",
-      maternalGrandfather: "MG Father",
-      maternalGrandmother: "MG Mother",
-      trainer: "Trainer Name",
-      owner: "Owner Name",
-      daysSinceLastReport: 3,
-      sharedWithVets: ["vet1", "vet3"] // Shared with Dr. Sarah Johnson and Dr. Emily Rodriguez
-    },
-    "Thunder Strike": {
-      id: "2",
-      name: "Thunder Strike",
-      yearOfBirth: 2021,
-      sex: "Colt",
-      color: "Chestnut",
-      wellnessScore: 76,
-      performanceScore: 84,
-      welfareAlert: false,
-      sire: "Thunder Sire",
-      dam: "Strike Dam",
-      paternalGrandfather: "Thunder PG Father",
-      paternalGrandmother: "Thunder PG Mother",
-      maternalGrandfather: "Strike MG Father",
-      maternalGrandmother: "Strike MG Mother",
-      trainer: "Trainer Name",
-      owner: "Owner Name",
-      daysSinceLastReport: 1,
-      sharedWithVets: ["vet2"] // Shared with Dr. Michael Thompson
-    },
-    "Golden Arrow": {
-      id: "3",
-      name: "Golden Arrow",
-      yearOfBirth: 2023,
-      sex: "Filly",
-      color: "Golden",
-      wellnessScore: 94,
-      performanceScore: 78,
-      welfareAlert: true,
-      sire: "Golden Sire",
-      dam: "Arrow Dam",
-      paternalGrandfather: "Golden PG Father",
-      paternalGrandmother: "Golden PG Mother",
-      maternalGrandfather: "Arrow MG Father",
-      maternalGrandmother: "Arrow MG Mother",
-      trainer: "Trainer Name",
-      owner: "Owner Name",
-      daysSinceLastReport: 2,
-      sharedWithVets: [] // Not shared with any vets yet
-    }
-  };
-
-  // Default horse to display when opening the pane (if no horse is selected from overview)
-  const defaultHorse: Horse = {
-    id: "1",
-    name: "Midnight Approval",
-    yearOfBirth: 2022,
-    sex: "Colt",
-    color: "Bay",
-    wellnessScore: 88,
-    performanceScore: 92,
-    welfareAlert: false,
-    sire: "Sire Name",
-    dam: "Dam Name",
-    paternalGrandfather: "PG Father",
-    paternalGrandmother: "PG Mother",
-    maternalGrandfather: "MG Father",
-    maternalGrandmother: "MG Mother",
-    trainer: "Trainer Name",
-    owner: "Owner Name",
-    daysSinceLastReport: 3,
-    sharedWithVets: ["vet1", "vet3"]
-  };
-
-  const [selectedHorse, setSelectedHorse] = useState<Horse | null>(null);
+const TrainerHorseAnalyticsPane = ({ 
+  onPaneChange, 
+  selectedHorse: selectedTrainerHorse, 
+  selectedHorseName,
+  selectedReport 
+}: TrainerHorseAnalyticsPaneProps) => {
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [shouldShowLastReport, setShouldShowLastReport] = useState(false);
 
-  // Effect to handle horse selection from overview pane
-  useEffect(() => {
-    if (selectedHorseName && mockHorses[selectedHorseName]) {
-      setSelectedHorse(mockHorses[selectedHorseName]);
-      setShouldShowLastReport(true);
-    } else if (!selectedHorse) {
-      setSelectedHorse(defaultHorse);
-    }
-  }, [selectedHorseName]);
+  // Fetch all trainer horses to look up by name if needed
+  const { loading: horsesLoading, findByName } = useTrainerHorses();
 
-  const handleSelectHorse = (horse: Horse) => {
-    setSelectedHorse(horse);
-    setShouldShowLastReport(false);
-  };
+  // Use the passed horse, or find by name from the fetched list
+  const effectiveHorse = selectedTrainerHorse || 
+    (selectedHorseName ? findByName(selectedHorseName) : undefined);
+
+  // Convert TrainerHorse to analytics format
+  const analyticsHorse = effectiveHorse 
+    ? trainerHorseToAnalyticsHorse(effectiveHorse) 
+    : null;
+
+  // Effect to handle horse selection
+  useEffect(() => {
+    if (selectedTrainerHorse || selectedHorseName) {
+      setShouldShowLastReport(true);
+    }
+  }, [selectedTrainerHorse, selectedHorseName]);
 
   const handleSearchClick = () => {
     setShowSearchDialog(true);
   };
 
   const renderHorseInfo = () => {
-    if (!selectedHorse) {
-      return <NoHorseSelected />;
+    // Show loading while fetching horses (only if we need to look up by name)
+    if (!selectedTrainerHorse && selectedHorseName && horsesLoading) {
+      return <LoadingSpinner message="Loading horse data..." />;
     }
 
-    return (
-      <div className="space-y-3">
-        <HorseBasicInfoCard horse={selectedHorse} />
-        <HorseAnalyticsTabs 
-          horse={selectedHorse} 
-          defaultTab={shouldShowLastReport ? "last-report" : undefined}
-          selectedReport={selectedReport}
-        />
-      </div>
-    );
+    // If we have full horse data (either passed or found by name), show the analytics
+    if (analyticsHorse) {
+      return (
+        <div className="space-y-3">
+          <HorseBasicInfoCard horse={analyticsHorse} />
+          <HorseAnalyticsTabs 
+            horse={analyticsHorse} 
+            defaultTab={shouldShowLastReport ? "last-report" : undefined}
+            selectedReport={selectedReport}
+          />
+        </div>
+      );
+    }
+
+    // If we only have horse name but couldn't find in list, show minimal info
+    if (selectedHorseName && selectedReport) {
+      const minimalHorse = createMinimalHorse(String(selectedReport.id), selectedHorseName);
+
+      return (
+        <div className="space-y-3">
+          <HorseBasicInfoCard horse={minimalHorse} />
+          <HorseAnalyticsTabs 
+            horse={minimalHorse} 
+            defaultTab="last-report"
+            selectedReport={selectedReport}
+          />
+        </div>
+      );
+    }
+
+    return <NoHorseSelected />;
   };
 
   return (
@@ -165,7 +113,7 @@ const TrainerHorseAnalyticsPane = ({ onPaneChange, selectedHorse: selectedHorseN
       <HorseSearchDialog
         open={showSearchDialog}
         onOpenChange={setShowSearchDialog}
-        onSelectHorse={handleSelectHorse}
+        onSelectHorse={() => {}} // TODO: implement search selection
       />
     </div>
   );

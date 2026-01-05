@@ -80,18 +80,57 @@ class HorseController extends Controller
             ->orderBy('m.date', 'desc')
             ->get();
 
+        // Get unique horse IDs
+        $horseIds = $entries->pluck('horse_id')->unique()->values()->toArray();
+
+        // Fetch horse details from tiller_races (most recent record per horse)
+        $horseDetails = [];
+        if (!empty($horseIds)) {
+            // Get the latest tiller_races record for each horse
+            $tillerData = DB::connection('stridesafe')
+                ->table('tiller_races as tr')
+                ->whereIn('tr.horse_id', $horseIds)
+                ->select([
+                    'tr.horse_id',
+                    'tr.Sex',
+                    'tr.Sire',
+                    'tr.Dam',
+                    'tr.SireSire',
+                    'tr.DamSire',
+                    'tr.Breeder',
+                    'tr.Owner_Full_Name',
+                    'tr.D',
+                ])
+                ->orderBy('tr.D', 'desc')
+                ->get();
+
+            // Group by horse_id and take the first (most recent) record
+            foreach ($tillerData as $record) {
+                if (!isset($horseDetails[$record->horse_id])) {
+                    $horseDetails[$record->horse_id] = $record;
+                }
+            }
+        }
+
         // Group entries by horse
         $horseData = [];
         foreach ($entries as $entry) {
             $horseId = $entry->horse_id;
+            $tillerInfo = $horseDetails[$horseId] ?? null;
             
             if (!isset($horseData[$horseId])) {
                 $horseData[$horseId] = [
                     'id' => (string) $horseId,
                     'name' => $this->cleanHorseName($entry->horse_name),
                     'yearOfBirth' => $entry->DOB ? Carbon::parse($entry->DOB)->year : null,
-                    'sire' => $entry->sire,
-                    'dam' => $entry->dam,
+                    // Prefer tiller_races data, fall back to horses table
+                    'sire' => $tillerInfo?->Sire ?? $entry->sire,
+                    'dam' => $tillerInfo?->Dam ?? $entry->dam,
+                    'sireSire' => $tillerInfo?->SireSire,
+                    'damSire' => $tillerInfo?->DamSire,
+                    'sex' => $this->formatSex($tillerInfo?->Sex),
+                    'breeder' => $tillerInfo?->Breeder,
+                    'owner' => $tillerInfo?->Owner_Full_Name,
                     'entries' => [],
                 ];
             }
@@ -126,8 +165,13 @@ class HorseController extends Controller
                 'id' => $horse['id'],
                 'name' => $horse['name'],
                 'yearOfBirth' => $horse['yearOfBirth'],
+                'sex' => $horse['sex'],
                 'sire' => $horse['sire'],
                 'dam' => $horse['dam'],
+                'sireSire' => $horse['sireSire'],
+                'damSire' => $horse['damSire'],
+                'breeder' => $horse['breeder'],
+                'owner' => $horse['owner'],
                 'daysSinceLastRace' => $daysSinceLastRace,
                 'riskHistory' => $riskHistory,
                 'recentFatigue' => $mostRecent 
@@ -184,6 +228,22 @@ class HorseController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Convert sex code to display string
+     */
+    private function formatSex(?string $sex): string
+    {
+        return match ($sex) {
+            'C' => 'Colt',
+            'F' => 'Filly',
+            'M' => 'Mare',
+            'H' => 'Horse',
+            'G' => 'Gelding',
+            'R' => 'Ridgling',
+            default => 'Unknown',
+        };
     }
 
     /**

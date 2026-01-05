@@ -32,8 +32,13 @@ export interface TrainerHorse {
   id: string;
   name: string;
   yearOfBirth: number | null;
+  sex: string;
   sire: string | null;
   dam: string | null;
+  sireSire: string | null;
+  damSire: string | null;
+  breeder: string | null;
+  owner: string | null;
   daysSinceLastRace: number | null;
   riskHistory: number[];
   recentFatigue: number | null;

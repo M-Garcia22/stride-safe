@@ -9,6 +9,7 @@ import TrainerAccessManagerPane from "./panes/TrainerAccessManagerPane";
 import TrainerHorsesPane from "./panes/TrainerHorsesPane";
 import { useState } from "react";
 import { Report } from "@/types/report";
+import { TrainerHorse } from "@/types/horse";
 import { useToast } from "@/hooks/use-toast";
 
 interface TrainerMainContentProps {
@@ -17,12 +18,20 @@ interface TrainerMainContentProps {
 }
 
 const TrainerMainContent = ({ activePane, onPaneChange }: TrainerMainContentProps) => {
-  const [selectedHorse, setSelectedHorse] = useState<string | null>(null);
+  const [selectedHorse, setSelectedHorse] = useState<TrainerHorse | null>(null);
+  const [selectedHorseName, setSelectedHorseName] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const { toast } = useToast();
 
-  const handleSelectHorse = (horseName: string) => {
-    setSelectedHorse(horseName);
+  const handleSelectHorse = (horse: TrainerHorse) => {
+    setSelectedHorse(horse);
+    setSelectedHorseName(horse.name);
+  };
+
+  // For panes that only have horse name (from reports)
+  const handleSelectHorseName = (horseName: string) => {
+    setSelectedHorseName(horseName);
+    setSelectedHorse(null);
   };
 
   const handleSelectReport = (report: Report) => {
@@ -39,17 +48,17 @@ const TrainerMainContent = ({ activePane, onPaneChange }: TrainerMainContentProp
   const renderPane = () => {
     switch (activePane) {
       case "overview":
-        return <TrainerOverviewPane onPaneChange={onPaneChange} onSelectHorse={handleSelectHorse} onSelectReport={handleSelectReport} />;
+        return <TrainerOverviewPane onPaneChange={onPaneChange} onSelectHorseName={handleSelectHorseName} onSelectReport={handleSelectReport} />;
       case "horses":
         return <TrainerHorsesPane onPaneChange={onPaneChange} onSelectHorse={handleSelectHorse} onSelectReport={handleSelectReport} />;
       case "stable":
         return <TrainerStablePane onPaneChange={onPaneChange} />;
       case "analytics":
-        return <TrainerHorseAnalyticsPane onPaneChange={onPaneChange} selectedHorse={selectedHorse} selectedReport={selectedReport} />;
+        return <TrainerHorseAnalyticsPane onPaneChange={onPaneChange} selectedHorse={selectedHorse} selectedHorseName={selectedHorseName} selectedReport={selectedReport} />;
       case "access-manager":
         return <TrainerAccessManagerPane />;
       default:
-        return <TrainerOverviewPane onPaneChange={onPaneChange} onSelectHorse={handleSelectHorse} onSelectReport={handleSelectReport} />;
+        return <TrainerOverviewPane onPaneChange={onPaneChange} onSelectHorseName={handleSelectHorseName} onSelectReport={handleSelectReport} />;
     }
   };
 

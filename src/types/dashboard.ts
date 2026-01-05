@@ -1,4 +1,5 @@
 import { Report } from './report';
+import { TrainerHorse } from './horse';
 
 /**
  * Dashboard Pane Types
@@ -31,7 +32,15 @@ export interface BasePaneProps<T extends string> {
 }
 
 export interface TrainerPaneProps extends BasePaneProps<TrainerDashboardPane> {
-  onSelectHorse?: (horseName: string) => void;
+  onSelectHorse?: (horse: TrainerHorse) => void;
+  onSelectReport?: (report: Report) => void;
+}
+
+/**
+ * Props for panes that only have report data (no full horse object)
+ */
+export interface TrainerReportPaneProps extends BasePaneProps<TrainerDashboardPane> {
+  onSelectHorseName?: (horseName: string) => void;
   onSelectReport?: (report: Report) => void;
 }
 

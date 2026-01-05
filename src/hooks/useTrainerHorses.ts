@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '@/lib/api';
 import { TrainerHorse } from '@/types/horse';
 
@@ -14,6 +14,8 @@ interface UseTrainerHorsesReturn {
   totalCount: number;
   trainerCode: string | null;
   refetch: () => Promise<void>;
+  findByName: (name: string) => TrainerHorse | undefined;
+  findById: (id: string) => TrainerHorse | undefined;
 }
 
 export function useTrainerHorses({
@@ -55,6 +57,17 @@ export function useTrainerHorses({
     }
   }, [fetchOnMount, fetchHorses]);
 
+  // Memoized lookup helpers
+  const findByName = useCallback(
+    (name: string) => horses.find(h => h.name.toLowerCase() === name.toLowerCase()),
+    [horses]
+  );
+
+  const findById = useCallback(
+    (id: string) => horses.find(h => h.id === id),
+    [horses]
+  );
+
   return {
     horses,
     loading,
@@ -62,6 +75,8 @@ export function useTrainerHorses({
     totalCount,
     trainerCode,
     refetch: fetchHorses,
+    findByName,
+    findById,
   };
 }
 
