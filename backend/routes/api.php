@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Horses - Trainer
     Route::get('/horses/trainer', [HorseController::class, 'trainerHorses']);
     Route::get('/horses/stable', [HorseController::class, 'trainerStable']);
+    Route::get('/horses/{horseId}/history', [HorseController::class, 'horseHistory']);
     
     // Velocity data for race analysis
     Route::get('/velocity/{entryCode}', [VelocityController::class, 'show']);

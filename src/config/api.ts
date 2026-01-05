@@ -27,6 +27,7 @@ export const API_CONFIG = {
       stable: '/horses/stable',
       list: '/horses',
       detail: (id: number | string) => `/horses/${id}`,
+      history: (horseId: number | string) => `/horses/${horseId}/history`,
     },
     
     // Races (future)

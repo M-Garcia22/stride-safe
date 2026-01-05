@@ -1,6 +1,5 @@
 
 import { TrendsEvent, ChartConfig } from "../types/trendsChart";
-import { scoreToPosition } from "../utils/nonLinearScale";
 import { getWelfareRiskCategory, getWelfareRiskCategoryColor, getWelfareRiskCategoryLabel } from "../utils/welfareRiskUtils";
 import { getDynamicSizes } from "./utils/barSizing";
 
@@ -31,8 +30,18 @@ const WellnessBar = ({
   onBarClick,
   isWellnessFirst = false
 }: WellnessBarProps) => {
-  const getMarkerPosition = (score: number) => {
-    const normalizedPosition = scoreToPosition(score);
+  /**
+   * Convert wellness risk category (1-5) to a position on the gradient bar.
+   * Risk 1 (lowest) = bottom of bar (green zone)
+   * Risk 5 (highest) = top of bar (red zone)
+   * Returns Y offset from top of chart area.
+   */
+  const getWellnessMarkerPosition = (riskCategory: number) => {
+    // Clamp risk category to 1-5 range
+    const clampedRisk = Math.max(1, Math.min(5, riskCategory));
+    // Map 1-5 to 0-1 (1 → 0, 5 → 1)
+    const normalizedPosition = (clampedRisk - 1) / 4;
+    // Convert to Y position (higher risk = higher on chart = lower Y value)
     return chartConfig.chartHeight - (normalizedPosition * chartConfig.chartHeight);
   };
 
@@ -74,7 +83,7 @@ const WellnessBar = ({
               {/* Consistent 6px white line marker */}
               <rect
                 x={barX + 2}
-                y={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) - 3}
+                y={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) - 3}
                 width={chartConfig.barWidth - 4}
                 height="6"
                 fill="white"
@@ -88,7 +97,7 @@ const WellnessBar = ({
               {/* Integrated white circular element - reduced outline weight */}
               <circle
                 cx={barX + chartConfig.barWidth / 2}
-                cy={chartConfig.padding.top + getMarkerPosition(event.wellnessScore)}
+                cy={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory)}
                 r={dynamicSizes.circleRadius}
                 fill="white"
                 stroke="#374151"
@@ -99,7 +108,7 @@ const WellnessBar = ({
               {/* Enhanced risk category badge */}
               <circle
                 cx={barX + chartConfig.barWidth / 2}
-                cy={chartConfig.padding.top + getMarkerPosition(event.wellnessScore)}
+                cy={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory)}
                 r={dynamicSizes.badgeRadius}
                 fill={riskCategoryColor}
                 className="drop-shadow-md pointer-events-none"
@@ -108,7 +117,7 @@ const WellnessBar = ({
               {/* Risk category number */}
               <text
                 x={barX + chartConfig.barWidth / 2}
-                y={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) + 4}
+                y={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) + 4}
                 textAnchor="middle"
                 className="font-bold fill-white pointer-events-none"
                 style={{ fontSize: dynamicSizes.fontSize }}
@@ -122,7 +131,7 @@ const WellnessBar = ({
               {/* Consistent 6px white line marker on column */}
               <rect
                 x={barX + 2}
-                y={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) - 3}
+                y={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) - 3}
                 width={chartConfig.barWidth - 4}
                 height="6"
                 fill="white"
@@ -136,7 +145,7 @@ const WellnessBar = ({
               {/* Enhanced badge above the column */}
               <circle
                 cx={barX + chartConfig.barWidth / 2}
-                cy={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) - 25}
+                cy={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) - 25}
                 r="14"
                 fill="white"
                 stroke="#374151"
@@ -146,7 +155,7 @@ const WellnessBar = ({
               
               <circle
                 cx={barX + chartConfig.barWidth / 2}
-                cy={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) - 25}
+                cy={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) - 25}
                 r="10"
                 fill={riskCategoryColor}
                 className="drop-shadow-md pointer-events-none"
@@ -154,7 +163,7 @@ const WellnessBar = ({
               
               <text
                 x={barX + chartConfig.barWidth / 2}
-                y={chartConfig.padding.top + getMarkerPosition(event.wellnessScore) - 21}
+                y={chartConfig.padding.top + getWellnessMarkerPosition(welfareRiskCategory) - 21}
                 textAnchor="middle"
                 className="text-sm font-bold fill-white pointer-events-none"
               >

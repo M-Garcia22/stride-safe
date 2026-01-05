@@ -63,10 +63,10 @@ const ChartLabels = ({
 
   return (
     <g>
-      {/* Date label */}
+      {/* Date label - positioned below the risk category badge */}
       <text
         x={getLabelCenterX()}
-        y={height - chartConfig.padding.bottom + 18}
+        y={height - chartConfig.padding.bottom + 28}
         textAnchor="middle"
         className="text-xs font-medium fill-gray-700"
       >
@@ -76,7 +76,7 @@ const ChartLabels = ({
       {/* Race course name label */}
       <text
         x={getLabelCenterX()}
-        y={height - chartConfig.padding.bottom + 32}
+        y={height - chartConfig.padding.bottom + 42}
         textAnchor="middle"
         className="text-xs fill-gray-500"
       >

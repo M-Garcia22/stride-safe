@@ -185,6 +185,27 @@ class ApiClient {
     }>(endpoints.horses.stable);
   }
 
+  async getHorseHistory(horseId: number | string, days: number = 180) {
+    return this.request<{
+      events: Array<{
+        id: string;
+        date: string;
+        type: 'race' | 'breeze';
+        location: string;
+        distance: string;
+        performanceScore: number;
+        wellnessScore: number;
+        welfareAlert: boolean;
+      }>;
+      meta: {
+        horseId: number;
+        horseName: string | null;
+        days: number;
+        total: number;
+      };
+    }>(`${endpoints.horses.history(horseId)}?days=${days}`);
+  }
+
   // Velocity/Performance data
   async getVelocityData(entryCode: number | string) {
     return this.request<VelocityApiResponse>(endpoints.velocity.byEntry(entryCode));

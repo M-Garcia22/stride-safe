@@ -102,39 +102,48 @@ const FatigueWellnessGraphCard = ({ horse, trendsData, onTabChange }: FatigueWel
           </p>
         </CardHeader>
         <CardContent className="p-6 pt-0">
-          <div className="h-80 w-full relative">
-            <ResponsiveChartContainer
-              minHeight={320}
-              maxHeight={320}
-              className="h-full"
-            >
-              {({ width, height }) => (
-                <TrendsChartCore
-                  processedData={processedData}
-                  trendData={trendData}
-                  selectedMetrics="both"
-                  showTrendLine={false}
-                  highlightedEventId={null}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                  onBarClick={handleBarClick}
-                  width={width}
-                  height={height}
-                  useTimeBasedPositioning={true}
-                  showDaysBetween={true}
-                />
-              )}
-            </ResponsiveChartContainer>
-            
-            {/* Custom Tooltip */}
-            <TrendsTooltip
-              tooltipData={tooltipData}
-              tooltipPosition={tooltipPosition}
-              showTooltip={showTooltip}
-              selectedMetrics="both"
-              fullScreen={false}
-            />
-          </div>
+          {sixMonthsData.length === 0 ? (
+            <div className="h-80 w-full flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <p className="text-lg font-medium">No race data available</p>
+                <p className="text-sm mt-1">No races found in the past 6 months for this horse.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="h-80 w-full relative">
+              <ResponsiveChartContainer
+                minHeight={320}
+                maxHeight={320}
+                className="h-full"
+              >
+                {({ width, height }) => (
+                  <TrendsChartCore
+                    processedData={processedData}
+                    trendData={trendData}
+                    selectedMetrics="both"
+                    showTrendLine={false}
+                    highlightedEventId={null}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                    onBarClick={handleBarClick}
+                    width={width}
+                    height={height}
+                    useTimeBasedPositioning={true}
+                    showDaysBetween={true}
+                  />
+                )}
+              </ResponsiveChartContainer>
+              
+              {/* Custom Tooltip */}
+              <TrendsTooltip
+                tooltipData={tooltipData}
+                tooltipPosition={tooltipPosition}
+                showTooltip={showTooltip}
+                selectedMetrics="both"
+                fullScreen={false}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

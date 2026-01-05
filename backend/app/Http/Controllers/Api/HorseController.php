@@ -103,6 +103,76 @@ class HorseController extends Controller
         ]);
     }
 
+    /**
+     * Get 180-day race history for a specific horse.
+     * Returns data in TrendsEvent format for the 180-Day Report tab.
+     */
+    public function horseHistory(Request $request, int $horseId): JsonResponse
+    {
+        $days = $request->input('days', 180);
+        $days = min(max((int) $days, 1), 365); // Clamp between 1-365 days
+        
+        $startDate = Carbon::now()->subDays($days)->format('Y-m-d');
+
+        // Fetch all race entries for this horse within the date range
+        $entries = DB::connection('stridesafe')
+            ->table('entries as e')
+            ->join('horses as h', 'e.horse_id', '=', 'h.id')
+            ->join('races as r', 'e.race_id', '=', 'r.id')
+            ->join('meetings as m', 'r.meeting_id', '=', 'm.id')
+            ->join('venues as v', 'm.venue_id', '=', 'v.id')
+            ->leftJoin('courses as c', 'r.course_id', '=', 'c.id')
+            ->leftJoin('race_data_v4 as rd', 'e.code', '=', 'rd.entry_code')
+            ->where('e.horse_id', '=', $horseId)
+            ->where('e.scratched', '=', 0)
+            ->where('m.date', '>=', $startDate)
+            ->select([
+                'e.code as entry_code',
+                'h.name as horse_name',
+                'm.date as race_date',
+                'v.name as venue_name',
+                'v.abbrev as venue_abbrev',
+                'r.distance',
+                'c.type as surface_type',
+                'rd.Final_Traficlight_FLAG as welfare_flag',
+                'rd.FrontLimb_INDEX as fatigue_index',
+            ])
+            ->orderBy('m.date', 'desc')
+            ->get();
+
+        // Transform to TrendsEvent format expected by frontend
+        $events = $entries->map(function ($entry) {
+            // Calculate fatigue score (performanceScore in frontend)
+            $fatigueScore = $this->calculateFatigueScore($entry->fatigue_index);
+            
+            // Welfare flag is the wellnessScore (1-5 scale, but frontend expects higher = better)
+            // The chart expects wellnessScore where lower values = higher risk
+            // We'll pass the raw welfare flag and let frontend handle display
+            $welfareFlag = $entry->welfare_flag;
+
+            return [
+                'id' => (string) $entry->entry_code,
+                'date' => $entry->race_date,
+                'type' => 'race',
+                'location' => $entry->venue_abbrev ?? $entry->venue_name,
+                'distance' => $this->formatDistance($entry->distance),
+                'performanceScore' => $fatigueScore ?? 50, // Fatigue score (0-100)
+                'wellnessScore' => $welfareFlag ?? 1, // Welfare risk category (1-5)
+                'welfareAlert' => $welfareFlag !== null && $welfareFlag >= 3,
+            ];
+        })->values()->toArray();
+
+        return response()->json([
+            'events' => $events,
+            'meta' => [
+                'horseId' => $horseId,
+                'horseName' => $entries->first()?->horse_name ? $this->cleanHorseName($entries->first()->horse_name) : null,
+                'days' => $days,
+                'total' => count($events),
+            ],
+        ]);
+    }
+
     // =========================================================================
     // Query Methods
     // =========================================================================

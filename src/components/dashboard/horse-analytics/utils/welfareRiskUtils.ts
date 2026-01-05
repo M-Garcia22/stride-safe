@@ -1,6 +1,13 @@
-
 // Utility functions for welfare risk categories based on Knowledge Guidelines
+// The wellnessScore from the API is already the risk category (1-5) from Final_Traficlight_FLAG
 export const getWelfareRiskCategory = (welfareScore: number, hasExcessiveStrideMovement: boolean = false): number => {
+  // If the score is already a valid risk category (1-5), return it directly
+  // This handles real data from the database where Final_Traficlight_FLAG is already 1-5
+  if (welfareScore >= 1 && welfareScore <= 5) {
+    return Math.round(welfareScore);
+  }
+  
+  // Legacy conversion for mock data with scores in 0-140 range
   if (welfareScore >= 116) return 5; // 116-140
   if (welfareScore >= 102) return 4; // 102-115
   if (welfareScore >= 70) return 3;  // 70-101

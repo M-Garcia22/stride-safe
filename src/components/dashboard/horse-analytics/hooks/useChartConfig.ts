@@ -10,8 +10,8 @@ export const useChartConfig = (
   useTimeBasedPositioning: boolean = false
 ): ChartConfig => {
   return useMemo(() => {
-    // Optimized padding for better space utilization
-    const padding = { top: 40, right: 60, bottom: 50, left: 50 };
+    // Bottom padding increased to accommodate date labels below risk category badges
+    const padding = { top: 40, right: 60, bottom: 60, left: 50 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
     
