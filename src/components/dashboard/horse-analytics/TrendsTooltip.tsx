@@ -1,20 +1,10 @@
 
 import { format, parseISO } from "date-fns";
 import { getPerformanceColor, getWellnessColor } from "@/lib/colorUtils";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface TrendsTooltipProps {
-  tooltipData: TrendsEvent | null;
+  tooltipData: BaseTrendsEvent | null;
   tooltipPosition: { x: number; y: number };
   showTooltip: boolean;
   selectedMetrics: 'both' | 'performance' | 'wellness';

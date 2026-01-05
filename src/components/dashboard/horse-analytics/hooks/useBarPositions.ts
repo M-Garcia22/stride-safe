@@ -1,5 +1,6 @@
 
 import { useMemo } from "react";
+import { useChartConfig } from "./useChartConfig";
 
 export const useBarPositions = (
   width: number,
@@ -8,25 +9,19 @@ export const useBarPositions = (
   selectedMetrics: 'both' | 'performance' | 'wellness',
   useTimeBasedPositioning: boolean
 ) => {
+  // Use the same chart config that the bars use - this ensures alignment
+  const chartConfig = useChartConfig(width, height, dataLength, selectedMetrics, useTimeBasedPositioning);
+  
   return useMemo(() => {
-    const padding = { top: 20, right: 20, bottom: 60, left: 60 };
-    const chartWidth = width - padding.left - padding.right;
-    
-    const barSpacing = selectedMetrics === 'both' ? 2 : 0;
-    const barWidth = useTimeBasedPositioning 
-      ? (selectedMetrics === 'both' ? 32 : 40)
-      : (selectedMetrics === 'both' ? Math.max(12, 24) : Math.max(16, 32));
+    const { padding, barWidth, barSpacing, groupSpacing, barGroupWidth, chartWidth } = chartConfig;
     
     if (useTimeBasedPositioning && dataLength > 0) {
       // Fixed spacing with centering - oldest (index 0) positioned on far left, most recent on far right
-      const barGroupWidth = selectedMetrics === 'both' ? barWidth * 2 + barSpacing : barWidth;
-      const groupSpacing = 40;
-      const totalWidth = dataLength * barGroupWidth + (dataLength - 1) * groupSpacing;
+      const totalWidth = dataLength * barGroupWidth + (dataLength - 1) * (groupSpacing || 40);
       const startX = padding.left + Math.max(0, (chartWidth - totalWidth) / 2);
       
       return Array.from({ length: dataLength }, (_, index) => {
-        // Index 0 (oldest) is positioned at the leftmost position, highest index (most recent) at rightmost
-        const baseX = startX + index * (barGroupWidth + groupSpacing);
+        const baseX = startX + index * (barGroupWidth + (groupSpacing || 40));
         
         if (selectedMetrics === 'both') {
           return {
@@ -41,14 +36,8 @@ export const useBarPositions = (
         }
       });
     } else {
-      // Original evenly distributed positioning - oldest (index 0) on far left, most recent on far right
-      const groupSpacing = Math.max(8, chartWidth * 0.02);
-      const barGroupWidth = dataLength > 1 
-        ? (chartWidth - (dataLength - 1) * groupSpacing) / dataLength
-        : chartWidth * 0.8;
-
+      // Evenly distributed positioning - oldest (index 0) on far left, most recent on far right
       return Array.from({ length: dataLength }, (_, index) => {
-        // Position index 0 (oldest) at the leftmost position, highest index (most recent) at rightmost
         const groupX = padding.left + index * (barGroupWidth + groupSpacing);
         
         if (selectedMetrics === 'both') {
@@ -64,5 +53,5 @@ export const useBarPositions = (
         }
       });
     }
-  }, [width, height, dataLength, selectedMetrics, useTimeBasedPositioning]);
+  }, [chartConfig, dataLength, selectedMetrics, useTimeBasedPositioning]);
 };

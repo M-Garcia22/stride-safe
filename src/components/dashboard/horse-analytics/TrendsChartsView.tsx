@@ -10,20 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Maximize2 } from "lucide-react";
 import { useState } from "react";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface TrendsChartsViewProps {
-  data: TrendsEvent[];
+  data: BaseTrendsEvent[];
   selectedMetrics: 'both' | 'performance' | 'wellness';
   timeframe: '3m' | '6m' | '9m' | '12m' | 'all';
   eventTypes: 'both' | 'race' | 'breeze';

@@ -10,21 +10,11 @@ import { useTrendsData } from "./hooks/useTrendsData";
 import { useTrendsTooltip } from "./hooks/useTrendsTooltip";
 import TrendsTooltip from "./TrendsTooltip";
 import WelfareRiskInfoDialog from "./components/WelfareRiskInfoDialog";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface FatigueWellnessGraphCardProps {
   horse: Horse;
-  trendsData: TrendsEvent[];
+  trendsData: BaseTrendsEvent[];
   onTabChange?: (tab: string) => void;
 }
 

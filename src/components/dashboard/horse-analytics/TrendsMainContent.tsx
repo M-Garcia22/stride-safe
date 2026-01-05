@@ -3,21 +3,11 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import { Horse } from "@/types/horse";
 import TrendsChartsView from "./TrendsChartsView";
 import TrendsHistoryTable from "./TrendsHistoryTable";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface TrendsMainContentProps {
   horse: Horse;
-  trendsData: TrendsEvent[];
+  trendsData: BaseTrendsEvent[];
   selectedMetrics: 'both' | 'performance' | 'wellness';
   timeframe: '3m' | '6m' | '9m' | '12m' | 'all';
   eventTypes: 'both' | 'race' | 'breeze';

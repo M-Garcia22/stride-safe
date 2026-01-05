@@ -3,20 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import TrendsHistoryTable from "./TrendsHistoryTable";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface TrendsHistorySectionProps {
-  trendsData: TrendsEvent[];
+  trendsData: BaseTrendsEvent[];
   timeframe: '3m' | '6m' | '9m' | '12m' | 'all';
   eventTypes: 'both' | 'race' | 'breeze';
   selectedEventId: string | null;

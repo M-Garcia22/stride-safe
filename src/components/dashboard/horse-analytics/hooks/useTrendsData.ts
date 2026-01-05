@@ -1,26 +1,9 @@
 import { useMemo } from "react";
 import { format, parseISO, subMonths, isAfter } from "date-fns";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
-
-interface ProcessedEvent extends TrendsEvent {
-  performanceChange: number;
-  wellnessChange: number;
-  formattedDate: string;
-  index: number;
-}
+import { BaseTrendsEvent, TrendsEvent } from "../types/trendsChart";
 
 export const useTrendsData = (
-  data: TrendsEvent[],
+  data: BaseTrendsEvent[],
   timeframe: '3m' | '6m' | '9m' | '12m' | 'all',
   eventTypes: 'both' | 'race' | 'breeze',
   showTrendLine: boolean

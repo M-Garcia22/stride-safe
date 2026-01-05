@@ -1,18 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-  formattedDate: string;
-  index: number;
-}
+import { TrendsEvent } from "../types/trendsChart";
 
 export const useTrendsTooltip = (processedData: TrendsEvent[], onEventSelect: (eventId: string) => void) => {
   const [tooltipData, setTooltipData] = useState<any>(null);

@@ -1,42 +1,44 @@
 
-import { useMemo } from "react";
 import { scoreToPosition } from "../utils/nonLinearScale";
+import { TrendsEvent, ChartConfig } from "../types/trendsChart";
 
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-  formattedDate: string;
-  index: number;
+interface ExtendedTrendsEvent extends TrendsEvent {
   performanceTrend?: number;
   wellnessTrend?: number;
   positionRatio?: number;
 }
 
 interface TrendLinesProps {
-  chartDataWithTrends: TrendsEvent[];
+  chartDataWithTrends: ExtendedTrendsEvent[];
   selectedMetrics: 'both' | 'performance' | 'wellness';
   barCenterPositions: Array<{ performance: number; wellness: number }>;
+  chartConfig: ChartConfig;
   width: number;
   height: number;
 }
+
+/**
+ * Convert wellness risk category (1-5) to a normalized position (0-1).
+ * Risk 1 (lowest) = 0 (bottom of chart)
+ * Risk 5 (highest) = 1 (top of chart)
+ */
+const wellnessScoreToPosition = (riskCategory: number): number => {
+  const clampedRisk = Math.max(1, Math.min(5, riskCategory));
+  return (clampedRisk - 1) / 4;
+};
 
 const TrendLines = ({
   chartDataWithTrends,
   selectedMetrics,
   barCenterPositions,
+  chartConfig,
   width,
   height
 }: TrendLinesProps) => {
   if (chartDataWithTrends.length <= 1) return null;
 
-  const padding = { top: 20, right: 20, bottom: 60, left: 60 };
-  const chartHeight = height - padding.top - padding.bottom;
+  // Use the same config as the chart for consistent positioning
+  const { padding, chartHeight } = chartConfig;
 
   return (
     <svg 
@@ -52,12 +54,12 @@ const TrendLines = ({
         </filter>
       </defs>
       
-      {/* Performance (Fatigue) trend line - Blue */}
+      {/* Performance (Fatigue) trend line - Blue - positioned on blue/performance bar */}
       {(selectedMetrics === 'both' || selectedMetrics === 'performance') && (
         <g>
           <polyline
             points={chartDataWithTrends.map((event, index) => {
-              const x = barCenterPositions[index]?.performance || 0;
+              const x = barCenterPositions[index]?.wellness || 0;
               const normalizedPosition = scoreToPosition(event.performanceScore);
               const y = padding.top + chartHeight - (normalizedPosition * chartHeight);
               return `${x},${y}`;
@@ -70,7 +72,7 @@ const TrendLines = ({
           />
           
           {chartDataWithTrends.map((event, index) => {
-            const x = barCenterPositions[index]?.performance || 0;
+            const x = barCenterPositions[index]?.wellness || 0;
             const normalizedPosition = scoreToPosition(event.performanceScore);
             const y = padding.top + chartHeight - (normalizedPosition * chartHeight);
             
@@ -90,13 +92,14 @@ const TrendLines = ({
         </g>
       )}
 
-      {/* Wellness (Welfare) trend line - Red */}
+      {/* Wellness (Welfare) trend line - Red - positioned on gradient/wellness bar */}
       {(selectedMetrics === 'both' || selectedMetrics === 'wellness') && (
         <g>
           <polyline
             points={chartDataWithTrends.map((event, index) => {
-              const x = barCenterPositions[index]?.wellness || 0;
-              const normalizedPosition = scoreToPosition(event.wellnessScore);
+              const x = barCenterPositions[index]?.performance || 0;
+              // Use wellness-specific scale (1-5 risk category)
+              const normalizedPosition = wellnessScoreToPosition(event.wellnessScore);
               const y = padding.top + chartHeight - (normalizedPosition * chartHeight);
               return `${x},${y}`;
             }).join(' ')}
@@ -108,8 +111,9 @@ const TrendLines = ({
           />
           
           {chartDataWithTrends.map((event, index) => {
-            const x = barCenterPositions[index]?.wellness || 0;
-            const normalizedPosition = scoreToPosition(event.wellnessScore);
+            const x = barCenterPositions[index]?.performance || 0;
+            // Use wellness-specific scale (1-5 risk category)
+            const normalizedPosition = wellnessScoreToPosition(event.wellnessScore);
             const y = padding.top + chartHeight - (normalizedPosition * chartHeight);
             
             return (

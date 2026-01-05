@@ -3,23 +3,12 @@ import { useMemo } from "react";
 import CustomTrendsBarChart from "./CustomTrendsBarChart";
 import TrendLines from "./components/TrendLines";
 import { useBarPositions } from "./hooks/useBarPositions";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { useChartConfig } from "./hooks/useChartConfig";
+import { TrendsEvent } from "./types/trendsChart";
 
 interface ProcessedEvent extends TrendsEvent {
   performanceChange: number;
   wellnessChange: number;
-  formattedDate: string;
-  index: number;
   performanceTrend?: number;
   wellnessTrend?: number;
   positionRatio?: number;
@@ -76,6 +65,8 @@ const TrendsChartCore = ({
     }));
   }, [processedData, trendData]);
 
+  const chartConfig = useChartConfig(width, height, processedData.length, selectedMetrics, useTimeBasedPositioning);
+  
   const barCenterPositions = useBarPositions(
     width,
     height,
@@ -110,6 +101,7 @@ const TrendsChartCore = ({
             chartDataWithTrends={chartDataWithTrends}
             selectedMetrics={selectedMetrics}
             barCenterPositions={barCenterPositions}
+            chartConfig={chartConfig}
             width={width}
             height={height}
           />

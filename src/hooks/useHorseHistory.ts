@@ -1,25 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
-
-export interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from '@/components/dashboard/horse-analytics/types/trendsChart';
 
 interface UseHorseHistoryOptions {
   horseId: string | number | null;
+  /** Number of days to fetch. 0 = all time. Default: 180 */
   days?: number;
   fetchOnMount?: boolean;
 }
 
 interface UseHorseHistoryReturn {
-  events: TrendsEvent[];
+  events: BaseTrendsEvent[];
   loading: boolean;
   error: string | null;
   horseName: string | null;
@@ -32,7 +23,7 @@ export function useHorseHistory({
   days = 180,
   fetchOnMount = true,
 }: UseHorseHistoryOptions): UseHorseHistoryReturn {
-  const [events, setEvents] = useState<TrendsEvent[]>([]);
+  const [events, setEvents] = useState<BaseTrendsEvent[]>([]);
   const [loading, setLoading] = useState(fetchOnMount && !!horseId);
   const [error, setError] = useState<string | null>(null);
   const [horseName, setHorseName] = useState<string | null>(null);

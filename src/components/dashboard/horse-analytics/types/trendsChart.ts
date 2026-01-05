@@ -1,4 +1,7 @@
-export interface TrendsEvent {
+/**
+ * Base trends event from API - raw data without processing
+ */
+export interface BaseTrendsEvent {
   id: string;
   date: string;
   type: 'race' | 'breeze';
@@ -7,10 +10,16 @@ export interface TrendsEvent {
   performanceScore: number;
   wellnessScore: number;
   welfareAlert: boolean;
+}
+
+/**
+ * Processed trends event with additional display properties
+ */
+export interface TrendsEvent extends BaseTrendsEvent {
   formattedDate: string;
   index: number;
   daysBetween?: number | null;
-  daysFromToday?: number; // Add this for time-based positioning
+  daysFromToday?: number;
 }
 
 export interface ChartConfig {

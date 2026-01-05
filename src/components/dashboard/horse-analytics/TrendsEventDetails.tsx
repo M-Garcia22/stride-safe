@@ -8,16 +8,9 @@ import ScoreCard from "@/components/dashboard/performance/ScoreCard";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { BaseTrendsEvent } from "./types/trendsChart";
 
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
+interface ExtendedTrendsEvent extends BaseTrendsEvent {
   surface?: string;
   trackCondition?: string;
   placement?: number;
@@ -25,7 +18,7 @@ interface TrendsEvent {
 }
 
 interface TrendsEventDetailsProps {
-  event: TrendsEvent | undefined;
+  event: ExtendedTrendsEvent | undefined;
 }
 
 const TrendsEventDetails = ({ event }: TrendsEventDetailsProps) => {

@@ -1,13 +1,27 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Horse } from "@/types/horse";
-import { generateTrendsData } from "@/utils/trendsData";
+import { useHorseHistory } from "@/hooks/useHorseHistory";
 import TrendsControlsBar from "./TrendsControlsBar";
 import TrendsMainContent from "./TrendsMainContent";
 import { useTrendsExport } from "./hooks/useTrendsExport";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { AlertCircle } from "lucide-react";
 
 interface TrendsAnalysisPaneProps {
   horse: Horse;
 }
+
+// Convert timeframe to days for API
+const timeframeToDays = (timeframe: '3m' | '6m' | '9m' | '12m' | 'all'): number => {
+  switch (timeframe) {
+    case '3m': return 90;
+    case '6m': return 180;
+    case '9m': return 270;
+    case '12m': return 365;
+    case 'all': return 0; // 0 = all time
+    default: return 180;
+  }
+};
 
 const TrendsAnalysisPane = ({ horse }: TrendsAnalysisPaneProps) => {
   const [selectedMetrics, setSelectedMetrics] = useState<'both' | 'performance' | 'wellness'>('both');
@@ -18,8 +32,12 @@ const TrendsAnalysisPane = ({ horse }: TrendsAnalysisPaneProps) => {
   const [highlightedEventId, setHighlightedEventId] = useState<string | null>(null);
   const [splitView, setSplitView] = useState(false);
 
-  // Generate sample data once and keep it stable
-  const [trendsData] = useState(() => generateTrendsData(horse.id));
+  // Fetch real data from API
+  const days = useMemo(() => timeframeToDays(timeframe), [timeframe]);
+  const { events: trendsData, loading, error } = useHorseHistory({
+    horseId: horse.id,
+    days,
+  });
 
   const { handleExport } = useTrendsExport(trendsData, horse.name);
 
@@ -31,6 +49,28 @@ const TrendsAnalysisPane = ({ horse }: TrendsAnalysisPaneProps) => {
   const handleEventHighlight = (eventId: string | null) => {
     setHighlightedEventId(eventId);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner message="Loading welfare & fatigue data..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+          <div>
+            <p className="font-medium text-foreground">Failed to load data</p>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full max-h-screen overflow-hidden">

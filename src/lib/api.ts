@@ -2,6 +2,7 @@ import { User, UserRole } from '@/types/user';
 import { Report } from '@/types/report';
 import { TrainerHorse } from '@/types/horse';
 import { VelocityApiResponse } from '@/types/velocity';
+import { BaseTrendsEvent } from '@/components/dashboard/horse-analytics/types/trendsChart';
 import { API_CONFIG } from '@/config/api';
 
 const { baseUrl, endpoints } = API_CONFIG;
@@ -187,16 +188,7 @@ class ApiClient {
 
   async getHorseHistory(horseId: number | string, days: number = 180) {
     return this.request<{
-      events: Array<{
-        id: string;
-        date: string;
-        type: 'race' | 'breeze';
-        location: string;
-        distance: string;
-        performanceScore: number;
-        wellnessScore: number;
-        welfareAlert: boolean;
-      }>;
+      events: BaseTrendsEvent[];
       meta: {
         horseId: number;
         horseName: string | null;

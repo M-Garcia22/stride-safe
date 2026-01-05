@@ -99,18 +99,18 @@ const TrainerHorsesPane = ({
               <p>No horses found in your stable.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-sm font-medium">Horse Name</TableHead>
-                  <TableHead className="text-sm font-medium">Born</TableHead>
-                  <TableHead className="text-sm font-medium">Risk History</TableHead>
-                  <TableHead className="text-sm font-medium">Recent Fatigue</TableHead>
-                  <TableHead className="text-sm font-medium">Risk Alert</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-sm font-medium">Horse Name</TableHead>
+                <TableHead className="text-sm font-medium">Born</TableHead>
+                <TableHead className="text-sm font-medium">Risk History</TableHead>
+                <TableHead className="text-sm font-medium">Recent Fatigue</TableHead>
+                <TableHead className="text-sm font-medium">Risk Alert</TableHead>
                   <TableHead className="text-sm font-medium">Last Race</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                 {horses.map(horse => (
                   <TableRow 
                     key={horse.id} 
@@ -136,19 +136,19 @@ const TrainerHorsesPane = ({
                       <div className="flex gap-1">
                         {horse.riskHistory.length > 0 ? (
                           horse.riskHistory.slice(0, 5).map((category, index) => {
-                            const riskColor = getWellnessColor(category * 25);
-                            return (
-                              <div
-                                key={index}
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 bg-white shadow-sm"
-                                style={{
-                                  borderColor: riskColor,
-                                  color: '#000'
-                                }}
-                              >
-                                {category}
-                              </div>
-                            );
+                          const riskColor = getWellnessColor(category * 25);
+                          return (
+                            <div
+                              key={index}
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 bg-white shadow-sm"
+                              style={{
+                                borderColor: riskColor,
+                                color: '#000'
+                              }}
+                            >
+                              {category}
+                            </div>
+                          );
                           })
                         ) : (
                           <span className="text-muted-foreground text-sm">No data</span>
@@ -196,8 +196,8 @@ const TrainerHorsesPane = ({
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
+            </TableBody>
+          </Table>
           )}
         </CardContent>
       </Card>

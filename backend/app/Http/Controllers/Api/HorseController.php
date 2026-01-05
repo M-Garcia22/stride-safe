@@ -105,28 +105,36 @@ class HorseController extends Controller
 
     /**
      * Get 180-day race history for a specific horse.
-     * Returns data in TrendsEvent format for the 180-Day Report tab.
+     * Returns data in TrendsEvent format for the 180-Day Report and Welfare & Fatigue tabs.
+     * 
+     * @param int $days Number of days to look back (0 = all time, max 3650 days/10 years)
      */
     public function horseHistory(Request $request, int $horseId): JsonResponse
     {
         $days = $request->input('days', 180);
-        $days = min(max((int) $days, 1), 365); // Clamp between 1-365 days
+        $days = (int) $days;
         
-        $startDate = Carbon::now()->subDays($days)->format('Y-m-d');
-
-        // Fetch all race entries for this horse within the date range
-        $entries = DB::connection('stridesafe')
+        // Build the query - only include entries with welfare data
+        $query = DB::connection('stridesafe')
             ->table('entries as e')
             ->join('horses as h', 'e.horse_id', '=', 'h.id')
             ->join('races as r', 'e.race_id', '=', 'r.id')
             ->join('meetings as m', 'r.meeting_id', '=', 'm.id')
             ->join('venues as v', 'm.venue_id', '=', 'v.id')
             ->leftJoin('courses as c', 'r.course_id', '=', 'c.id')
-            ->leftJoin('race_data_v4 as rd', 'e.code', '=', 'rd.entry_code')
+            ->join('race_data_v4 as rd', 'e.code', '=', 'rd.entry_code') // INNER JOIN to exclude entries without welfare data
             ->where('e.horse_id', '=', $horseId)
             ->where('e.scratched', '=', 0)
-            ->where('m.date', '>=', $startDate)
-            ->select([
+            ->whereNotNull('rd.Final_Traficlight_FLAG'); // Only entries with welfare data
+        
+        // Apply date filter unless days=0 (all time)
+        if ($days > 0) {
+            $days = min($days, 3650); // Max 10 years
+            $startDate = Carbon::now()->subDays($days)->format('Y-m-d');
+            $query->where('m.date', '>=', $startDate);
+        }
+        
+        $entries = $query->select([
                 'e.code as entry_code',
                 'h.name as horse_name',
                 'm.date as race_date',

@@ -1,18 +1,11 @@
 
 import { subDays, format } from 'date-fns';
+import { BaseTrendsEvent } from '@/components/dashboard/horse-analytics/types/trendsChart';
 
-export interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+// Re-export for backward compatibility
+export type { BaseTrendsEvent as TrendsEvent };
 
-export const generateTrendsData = (horseId: string): TrendsEvent[] => {
+export const generateTrendsData = (horseId: string): BaseTrendsEvent[] => {
   // Use horseId as seed for consistent data
   const seed = horseId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   
@@ -28,7 +21,7 @@ export const generateTrendsData = (horseId: string): TrendsEvent[] => {
 
   const distances = ['5f', '6f', '7f', '1m', '1m 1/16', '1m 1/8', '1m 1/4', '1.5m'];
 
-  const events: TrendsEvent[] = [];
+  const events: BaseTrendsEvent[] = [];
   const today = new Date();
   
   // Create specific race records as requested

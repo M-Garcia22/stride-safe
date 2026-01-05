@@ -10,20 +10,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getPerformanceColor, getWellnessColor } from "@/lib/colorUtils";
-
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "./types/trendsChart";
 
 interface TrendsHistoryTableProps {
-  data: TrendsEvent[];
+  data: BaseTrendsEvent[];
   timeframe: '3m' | '6m' | '9m' | '12m' | 'all';
   eventTypes: 'both' | 'race' | 'breeze';
   selectedEventId: string | null;
@@ -44,7 +34,7 @@ const TrendsHistoryTable = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(10);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<TrendsEvent | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<BaseTrendsEvent | null>(null);
 
   const filteredData = useMemo(() => {
     let filtered = [...data];
@@ -88,7 +78,7 @@ const TrendsHistoryTable = ({
     );
   };
 
-  const handleActionClick = (action: string, record: TrendsEvent) => {
+  const handleActionClick = (action: string, record: BaseTrendsEvent) => {
     if (action === 'summary') {
       setSelectedRecord(record);
       setShowSummaryDialog(true);

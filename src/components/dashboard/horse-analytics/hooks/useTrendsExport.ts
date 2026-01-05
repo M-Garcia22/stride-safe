@@ -1,16 +1,7 @@
 
-interface TrendsEvent {
-  id: string;
-  date: string;
-  type: 'race' | 'breeze';
-  location: string;
-  distance: string;
-  performanceScore: number;
-  wellnessScore: number;
-  welfareAlert: boolean;
-}
+import { BaseTrendsEvent } from "../types/trendsChart";
 
-export const useTrendsExport = (trendsData: TrendsEvent[], horseName: string) => {
+export const useTrendsExport = (trendsData: BaseTrendsEvent[], horseName: string) => {
   const handleExport = (format: 'csv' | 'pdf' | 'json') => {
     const data = trendsData;
     const filename = `${horseName}_trends_${new Date().toISOString().split('T')[0]}`;
