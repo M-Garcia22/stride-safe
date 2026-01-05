@@ -24,6 +24,7 @@ export const API_CONFIG = {
     // Horses
     horses: {
       trainer: '/horses/trainer',
+      stable: '/horses/stable',
       list: '/horses',
       detail: (id: number | string) => `/horses/${id}`,
     },
@@ -32,6 +33,11 @@ export const API_CONFIG = {
     races: {
       list: '/races',
       detail: (id: number | string) => `/races/${id}`,
+    },
+    
+    // Velocity/Performance data
+    velocity: {
+      byEntry: (entryCode: number | string) => `/velocity/${entryCode}`,
     },
   },
 } as const;

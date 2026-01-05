@@ -52,7 +52,7 @@ const TrainerOverviewPane = ({
       </div>
     );
   }
-
+  
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -79,86 +79,86 @@ const TrainerOverviewPane = ({
               <p>No reports available for the past 7 days.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-sm font-medium">Date</TableHead>
-                  <TableHead className="text-sm font-medium">Horse</TableHead>
-                  <TableHead className="text-sm font-medium">Track</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-sm font-medium">Date</TableHead>
+                <TableHead className="text-sm font-medium">Horse</TableHead>
+                <TableHead className="text-sm font-medium">Track</TableHead>
                   <TableHead className="text-sm font-medium">Race</TableHead>
                   <TableHead className="text-sm font-medium">Distance</TableHead>
-                  <TableHead className="text-sm font-medium">Risk Category</TableHead>
-                  <TableHead className="text-sm font-medium">Fatigue Score</TableHead>
-                  <TableHead className="text-sm font-medium">Welfare Alert</TableHead>
-                  <TableHead className="text-sm font-medium">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+                <TableHead className="text-sm font-medium">Risk Category</TableHead>
+                <TableHead className="text-sm font-medium">Fatigue Score</TableHead>
+                <TableHead className="text-sm font-medium">Welfare Alert</TableHead>
+                <TableHead className="text-sm font-medium">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                 {reports.map(report => {
-                  const riskCategoryColor = getWellnessColor(report.welfareRiskCategory * 25);
-                  const fatigueColor = getFatigueColor(report.fatigueScore);
+              const riskCategoryColor = getWellnessColor(report.welfareRiskCategory * 25);
+              const fatigueColor = getFatigueColor(report.fatigueScore);
                   return (
                     <TableRow 
                       key={report.id} 
                       className="hover:bg-blue-50/60 transition-colors duration-200 py-3 cursor-pointer" 
                       onClick={() => handleReportRowClick(report)}
                     >
-                      <TableCell className="font-medium text-sm py-3">
-                        {format(new Date(report.date), 'MMM dd, yyyy')}
-                      </TableCell>
-                      <TableCell className="text-sm py-3 font-medium">{report.horseName}</TableCell>
-                      <TableCell className="text-sm py-3">{report.track}</TableCell>
+                    <TableCell className="font-medium text-sm py-3">
+                      {format(new Date(report.date), 'MMM dd, yyyy')}
+                    </TableCell>
+                    <TableCell className="text-sm py-3 font-medium">{report.horseName}</TableCell>
+                    <TableCell className="text-sm py-3">{report.track}</TableCell>
                       <TableCell className="text-sm py-3">R{report.raceNo}</TableCell>
                       <TableCell className="text-sm py-3">{report.distance}</TableCell>
-                      <TableCell className="py-3">
-                        <div className="flex justify-center">
+                    <TableCell className="py-3">
+                      <div className="flex justify-center">
                           <div 
                             className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 bg-white shadow-sm" 
                             style={{
-                              borderColor: riskCategoryColor,
-                              color: '#000'
+                      borderColor: riskCategoryColor,
+                      color: '#000'
                             }}
                           >
-                            {report.welfareRiskCategory}
-                          </div>
+                          {report.welfareRiskCategory}
                         </div>
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <div className="flex justify-center">
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <div className="flex justify-center">
                           <div 
                             className="px-3 py-1 rounded-md flex items-center justify-center text-sm font-bold border-2 bg-white shadow-sm min-w-[50px]" 
                             style={{
-                              borderColor: fatigueColor,
-                              color: '#000'
+                      borderColor: fatigueColor,
+                      color: '#000'
                             }}
                           >
-                            {report.fatigueScore}
-                          </div>
+                          {report.fatigueScore}
                         </div>
-                      </TableCell>
-                      <TableCell className="py-3">
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3">
                         {report.welfareAlert ? (
                           <Badge variant="destructive" className="text-xs">
-                            Alert
+                          Alert
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground text-sm">None</span>
                         )}
-                      </TableCell>
-                      <TableCell className="py-3">
+                    </TableCell>
+                    <TableCell className="py-3">
                         {report.isNew ? (
                           <Badge variant="default" className="bg-blue-500 hover:bg-blue-600">
-                            New
+                          New
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground text-sm">Viewed</span>
                         )}
-                      </TableCell>
+                    </TableCell>
                     </TableRow>
                   );
-                })}
-              </TableBody>
-            </Table>
+            })}
+            </TableBody>
+          </Table>
           )}
         </CardContent>
       </Card>

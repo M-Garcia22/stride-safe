@@ -83,6 +83,7 @@ class ReportController extends Controller
         $formattedReports = $reports->map(function ($report) {
             return [
                 'id' => $report->id,
+                'entryCode' => $report->entry_code,
                 'date' => $report->meeting_date,
                 'track' => $report->venue_abbrev ?? $report->venue_name,
                 'raceNo' => $report->race_number,
@@ -170,6 +171,7 @@ class ReportController extends Controller
         $formattedReports = $reports->map(function ($report) {
             return [
                 'id' => $report->id,
+                'entryCode' => $report->entry_code,
                 'date' => $report->meeting_date,
                 'track' => $report->venue_abbrev ?? $report->venue_name,
                 'raceNo' => $report->race_number,

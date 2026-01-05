@@ -29,8 +29,8 @@ const LastReportTab = ({ horse, selectedReport }: LastReportTabProps) => {
       
       {/* Velocity Cards - Side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <VelocityTenSecondsCard horse={horse} />
-        <VelocityFullRaceCard horse={horse} />
+        <VelocityTenSecondsCard horse={horse} selectedReport={selectedReport} />
+        <VelocityFullRaceCard horse={horse} selectedReport={selectedReport} />
       </div>
     </div>
   );

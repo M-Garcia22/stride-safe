@@ -75,10 +75,13 @@ class AuthController extends Controller
         
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Use demo trainer name if demo mode is enabled for trainer accounts
+        $displayName = $this->getDisplayName($user);
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
-                'name' => $user->name,
+                'name' => $displayName,
                 'email' => $user->email,
                 'userType' => $user->user_type,
                 'organization' => $user->organization,
@@ -105,14 +108,28 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
+        $displayName = $this->getDisplayName($user);
 
         return response()->json([
             'id' => $user->id,
-            'name' => $user->name,
+            'name' => $displayName,
             'email' => $user->email,
             'userType' => $user->user_type,
             'organization' => $user->organization,
         ]);
+    }
+
+    /**
+     * Get display name for user (uses demo config for trainers in demo mode)
+     */
+    private function getDisplayName(User $user): string
+    {
+        // If demo mode is enabled and user is a trainer, use the demo trainer name
+        if (config('demo.enabled', false) && $user->user_type === 'trainer') {
+            return config('demo.trainer_name', $user->name);
+        }
+
+        return $user->name;
     }
 }
 

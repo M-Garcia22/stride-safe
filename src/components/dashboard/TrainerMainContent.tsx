@@ -52,7 +52,7 @@ const TrainerMainContent = ({ activePane, onPaneChange }: TrainerMainContentProp
       case "horses":
         return <TrainerHorsesPane onPaneChange={onPaneChange} onSelectHorse={handleSelectHorse} onSelectReport={handleSelectReport} />;
       case "stable":
-        return <TrainerStablePane onPaneChange={onPaneChange} />;
+        return <TrainerStablePane onPaneChange={onPaneChange} onSelectHorse={handleSelectHorse} onSelectReport={handleSelectReport} />;
       case "analytics":
         return <TrainerHorseAnalyticsPane onPaneChange={onPaneChange} selectedHorse={selectedHorse} selectedHorseName={selectedHorseName} selectedReport={selectedReport} />;
       case "access-manager":

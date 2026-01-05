@@ -1,8 +1,6 @@
+import { VelocityDataPoint } from './velocity';
 
-export interface VelocityDataPoint {
-  time: number;
-  velocity: number;
-}
+export type { VelocityDataPoint };
 
 export interface SpeedDataPoint {
   time: number;

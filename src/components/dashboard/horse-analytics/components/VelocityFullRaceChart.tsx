@@ -1,9 +1,5 @@
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, ReferenceLine, ReferenceDot } from "recharts";
-
-interface VelocityDataPoint {
-  time: number;
-  velocity: number;
-}
+import { VelocityDataPoint } from "@/types/velocity";
 
 interface VelocityFullRaceChartProps {
   data: VelocityDataPoint[];

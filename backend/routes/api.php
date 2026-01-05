@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HorseController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\VelocityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Horses - Trainer
     Route::get('/horses/trainer', [HorseController::class, 'trainerHorses']);
+    Route::get('/horses/stable', [HorseController::class, 'trainerStable']);
+    
+    // Velocity data for race analysis
+    Route::get('/velocity/{entryCode}', [VelocityController::class, 'show']);
 });

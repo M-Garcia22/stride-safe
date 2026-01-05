@@ -1,6 +1,6 @@
-
 export interface Report {
   id: number;
+  entryCode: number;
   date: string;
   track: string;
   raceNo: number;

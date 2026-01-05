@@ -30,6 +30,7 @@ const TrainerHorsesPane = ({
       // Convert HorseReport to Report format
       const report: Report = {
         id: mostRecentReport.id,
+        entryCode: mostRecentReport.id,
         date: mostRecentReport.date,
         track: mostRecentReport.track,
         raceNo: mostRecentReport.raceNo,

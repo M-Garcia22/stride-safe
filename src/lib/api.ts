@@ -1,6 +1,7 @@
 import { User, UserRole } from '@/types/user';
 import { Report } from '@/types/report';
 import { TrainerHorse } from '@/types/horse';
+import { VelocityApiResponse } from '@/types/velocity';
 import { API_CONFIG } from '@/config/api';
 
 const { baseUrl, endpoints } = API_CONFIG;
@@ -172,6 +173,21 @@ class ApiClient {
         trainerCode: string;
       };
     }>(endpoints.horses.trainer);
+  }
+
+  async getTrainerStable() {
+    return this.request<{
+      horses: TrainerHorse[];
+      meta: {
+        total: number;
+        trainerCode: string;
+      };
+    }>(endpoints.horses.stable);
+  }
+
+  // Velocity/Performance data
+  async getVelocityData(entryCode: number | string) {
+    return this.request<VelocityApiResponse>(endpoints.velocity.byEntry(entryCode));
   }
 }
 
