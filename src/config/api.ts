@@ -3,11 +3,13 @@
  * Central place to define all API endpoints and settings
  */
 
-// Detect if we're running on localhost for development
-const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173';
+// Detect if we're running on localhost for development (Vite dev server)
+const isLocalDev = typeof window !== 'undefined' && 
+  window.location.hostname === 'localhost' && 
+  ['8080', '5173', '3000'].includes(window.location.port);
 
 export const API_CONFIG = {
-  // Use relative URL unless explicitly in local dev mode
+  // Use relative URL in production, localhost:8000 in dev
   baseUrl: import.meta.env.VITE_API_URL || (isLocalDev ? 'http://localhost:8000/api' : '/api'),
   
   endpoints: {
@@ -50,4 +52,3 @@ export const API_CONFIG = {
 // Type helpers for endpoint paths
 export type AuthEndpoints = typeof API_CONFIG.endpoints.auth;
 export type ReportEndpoints = typeof API_CONFIG.endpoints.reports;
-
