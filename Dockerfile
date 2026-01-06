@@ -23,7 +23,7 @@ WORKDIR /var/www
 
 # Copy package files first for better caching
 COPY package*.json ./
-RUN npm install
+RUN rm -rf node_modules package-lock.json && npm install && npm install @rollup/rollup-linux-x64-gnu @swc/core-linux-x64-gnu
 
 # Copy composer files
 COPY backend/composer.json backend/composer.lock ./backend/
