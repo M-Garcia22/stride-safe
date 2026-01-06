@@ -32,7 +32,8 @@ RUN cd backend && composer install --no-dev --optimize-autoloader --no-scripts
 # Copy all source code
 COPY . .
 
-# Build frontend
+# Build frontend (ensure production mode)
+ENV NODE_ENV=production
 RUN npm run build && cp -r dist/* backend/public/
 
 # Set permissions
