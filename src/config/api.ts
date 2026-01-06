@@ -3,9 +3,12 @@
  * Central place to define all API endpoints and settings
  */
 
+// Detect if we're running on localhost for development
+const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173';
+
 export const API_CONFIG = {
-  // In production, use relative URL since frontend is served by Laravel
-  baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:8000/api'),
+  // Use relative URL unless explicitly in local dev mode
+  baseUrl: import.meta.env.VITE_API_URL || (isLocalDev ? 'http://localhost:8000/api' : '/api'),
   
   endpoints: {
     // Auth
