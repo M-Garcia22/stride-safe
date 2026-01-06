@@ -13,9 +13,7 @@ cmds = [
 [phases.build]
 cmds = [
   "npm run build",
-  "ls -la dist/",
-  "cp -r dist/* backend/public/",
-  "ls -la backend/public/"
+  "cp -r dist/* backend/public/"
 ]
 
 [start]

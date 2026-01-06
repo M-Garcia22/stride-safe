@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  stridesafe:
+    build: .
+    container_name: stridesafe-app
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - APP_NAME=StrideSafe
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://mt3.ruffdev.com/stridesafe
+      - DB_CONNECTION=mysql
+      - DB_HOST=172.17.0.1
+      - DB_PORT=3306
+      - DB_DATABASE=stridesafe_app
+      - DB_USERNAME=mgarcia
+      - DB_PASSWORD=eLinkAdmin123!
+      - STRIDESAFE_DB_HOST=172.17.0.1
+      - STRIDESAFE_DB_PORT=3306
+      - STRIDESAFE_DB_DATABASE=stridesafe
+      - STRIDESAFE_DB_USERNAME=mgarcia
+      - STRIDESAFE_DB_PASSWORD=eLinkAdmin123!
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - mt3_network
+
+networks:
+  mt3_network:
+    external: true
+    name: mt3_default
+
