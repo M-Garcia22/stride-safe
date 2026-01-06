@@ -1,6 +1,19 @@
+# Build frontend and deploy with Laravel backend
+[phases.setup]
+nixPkgs = ["nodejs", "php83", "php83Packages.composer"]
+
 [phases.install]
-cmds = ["rm -rf node_modules package-lock.json", "npm install"]
+cmds = [
+  "npm install",
+  "cd backend && composer install --no-dev --optimize-autoloader"
+]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = [
+  "npm run build",
+  "cp -r dist/* backend/public/"
+]
+
+[start]
+cmd = "cd backend && php artisan serve --host=0.0.0.0 --port=8080"
 

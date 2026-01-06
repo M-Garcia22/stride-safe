@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return ['Laravel' => app()->version()];
-});
+// Serve the React SPA for all non-API routes
+Route::get('/{any?}', function () {
+    return file_get_contents(public_path('index.html'));
+})->where('any', '^(?!api).*$');
 
 require __DIR__.'/auth.php';
