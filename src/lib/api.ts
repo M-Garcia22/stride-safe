@@ -5,7 +5,7 @@ import { VelocityApiResponse } from '@/types/velocity';
 import { BaseTrendsEvent } from '@/components/dashboard/horse-analytics/types/trendsChart';
 import { API_CONFIG } from '@/config/api';
 
-const { baseUrl, endpoints } = API_CONFIG;
+const { endpoints } = API_CONFIG;
 
 interface ApiError {
   message: string;
@@ -48,7 +48,7 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
         ...options,
         headers,
       });
