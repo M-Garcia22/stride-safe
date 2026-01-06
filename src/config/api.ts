@@ -3,28 +3,43 @@
  * Central place to define all API endpoints and settings
  */
 
-// Get base URL at runtime (not build time)
+// Runtime config - loaded from /config.json or defaults
+let runtimeApiUrl: string | null = null;
+
+// Load config from server (called once on app init)
+export async function loadRuntimeConfig(): Promise<void> {
+  try {
+    const response = await fetch('/config.json');
+    if (response.ok) {
+      const config = await response.json();
+      runtimeApiUrl = config.apiUrl || '/api';
+    }
+  } catch {
+    // Fallback to /api if config.json doesn't exist or fails
+    runtimeApiUrl = '/api';
+  }
+}
+
+// Get base URL - uses runtime config if loaded, otherwise smart default
 function getBaseUrl(): string {
-  // Check for explicit env var first
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  // If runtime config was loaded, use it
+  if (runtimeApiUrl !== null) {
+    return runtimeApiUrl;
   }
   
-  // Runtime check for local development
+  // Fallback: check if we're on localhost dev server
   if (typeof window !== 'undefined') {
     const { hostname, port } = window.location;
-    const isLocalDev = hostname === 'localhost' && ['8080', '5173', '3000'].includes(port);
-    if (isLocalDev) {
+    if (hostname === 'localhost' && ['8080', '5173', '3000'].includes(port)) {
       return 'http://localhost:8000/api';
     }
   }
   
-  // Default to relative URL for production
+  // Default for production
   return '/api';
 }
 
 export const API_CONFIG = {
-  // Getter ensures runtime evaluation
   get baseUrl() { return getBaseUrl(); },
   
   endpoints: {
