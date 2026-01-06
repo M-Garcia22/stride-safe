@@ -4,7 +4,9 @@ nixPkgs = ["nodejs", "php83", "php83Packages.composer"]
 
 [phases.install]
 cmds = [
-  "npm install",
+  "rm -rf node_modules",
+  "npm install --no-optional",
+  "npm install @rollup/rollup-linux-x64-gnu",
   "cd backend && composer install --no-dev --optimize-autoloader"
 ]
 
