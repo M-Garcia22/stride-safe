@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { TrainerHorse } from "@/types/horse";
+import { useState, useEffect, useCallback } from "react";
+import { TrainerHorse, HorseReport } from "@/types/horse";
 import { Report } from "@/types/report";
 import HorseBasicInfoCard from "@/components/dashboard/horse-analytics/HorseBasicInfoCard";
 import HorseAnalyticsTabs from "@/components/dashboard/horse-analytics/HorseAnalyticsTabs";
@@ -19,101 +19,97 @@ interface TrainerHorseAnalyticsPaneProps {
   selectedReport?: Report | null;
 }
 
+/** Convert a HorseReport to a Report object */
+const toReport = (report: HorseReport, horseName: string): Report => ({
+  ...report,
+  horseName,
+  isNew: false,
+  welfareRiskCategory: report.welfareRiskCategory ?? 1,
+  fatigueScore: report.fatigueScore ?? 50,
+});
+
 const TrainerHorseAnalyticsPane = ({ 
   onPaneChange, 
-  selectedHorse: selectedTrainerHorse, 
-  selectedHorseName,
-  selectedReport 
+  selectedHorse: parentHorse, 
+  selectedHorseName: parentHorseName,
+  selectedReport: parentReport 
 }: TrainerHorseAnalyticsPaneProps) => {
   const [showSearchDialog, setShowSearchDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [shouldShowLastReport, setShouldShowLastReport] = useState(false);
+  
+  // Local state for search-selected horse (overrides parent when set)
+  const [localHorse, setLocalHorse] = useState<TrainerHorse | null>(null);
+  const [localReport, setLocalReport] = useState<Report | null>(null);
 
-  // Fetch all trainer horses to look up by name if needed
   const { loading: horsesLoading, findByName } = useTrainerHorses();
 
-  // Use the passed horse, or find by name from the fetched list
-  const effectiveHorse = selectedTrainerHorse || 
-    (selectedHorseName ? findByName(selectedHorseName) : undefined);
-
-  // Convert TrainerHorse to analytics format
-  const analyticsHorse = effectiveHorse 
-    ? trainerHorseToAnalyticsHorse(effectiveHorse) 
-    : null;
-
-  // Effect to handle horse selection
+  // Reset local selection when parent selection changes
   useEffect(() => {
-    if (selectedTrainerHorse || selectedHorseName) {
-      setShouldShowLastReport(true);
+    if (parentHorse || parentHorseName) {
+      setLocalHorse(null);
+      setLocalReport(null);
     }
-  }, [selectedTrainerHorse, selectedHorseName]);
+  }, [parentHorse, parentHorseName]);
 
-  const handleSearchClick = () => {
-    setShowSearchDialog(true);
-  };
+  // Determine which horse/report to display (local overrides parent)
+  const activeHorse = localHorse ?? parentHorse ?? (parentHorseName ? findByName(parentHorseName) : null);
+  const activeReport = localReport ?? parentReport;
+  const analyticsHorse = activeHorse ? trainerHorseToAnalyticsHorse(activeHorse) : null;
 
-  const renderHorseInfo = () => {
-    // Show loading while fetching horses (only if we need to look up by name)
-    if (!selectedTrainerHorse && selectedHorseName && horsesLoading) {
-      return <LoadingSpinner message="Loading horse data..." />;
-    }
+  const handleSearchSelect = useCallback((horse: TrainerHorse) => {
+    setLocalHorse(horse);
+    
+    // Use most recent report if available
+    const mostRecent = horse.recentReports?.[0];
+    setLocalReport(mostRecent ? toReport(mostRecent, horse.name) : null);
+  }, []);
 
-    // If we have full horse data (either passed or found by name), show the analytics
-    if (analyticsHorse) {
-      return (
-        <div className="space-y-3">
-          <HorseBasicInfoCard horse={analyticsHorse} />
-          <HorseAnalyticsTabs 
-            horse={analyticsHorse} 
-            defaultTab={shouldShowLastReport ? "last-report" : undefined}
-            selectedReport={selectedReport}
-          />
-        </div>
-      );
-    }
-
-    // If we only have horse name but couldn't find in list, show minimal info
-    if (selectedHorseName && selectedReport) {
-      const minimalHorse = createMinimalHorse(String(selectedReport.id), selectedHorseName);
-
-      return (
-        <div className="space-y-3">
-          <HorseBasicInfoCard horse={minimalHorse} />
-          <HorseAnalyticsTabs 
-            horse={minimalHorse} 
-            defaultTab="last-report"
-            selectedReport={selectedReport}
-          />
-        </div>
-      );
-    }
-
-    return <NoHorseSelected />;
-  };
+  // Loading state
+  if (!parentHorse && parentHorseName && horsesLoading) {
+    return <LoadingSpinner message="Loading horse data..." />;
+  }
 
   return (
     <div className="space-y-3">
-      {/* Header with Search Field on the right */}
+      {/* Search Header */}
       <div className="flex items-center justify-end">
         <div className="relative max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search horses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onClick={handleSearchClick}
+            onClick={() => setShowSearchDialog(true)}
             className="pl-8 cursor-pointer"
             readOnly
           />
         </div>
       </div>
 
-      {renderHorseInfo()}
+      {/* Horse Content */}
+      {analyticsHorse ? (
+        <div className="space-y-3" key={analyticsHorse.id}>
+          <HorseBasicInfoCard horse={analyticsHorse} />
+          <HorseAnalyticsTabs 
+            horse={analyticsHorse} 
+            defaultTab="last-report"
+            selectedReport={activeReport}
+          />
+        </div>
+      ) : parentHorseName && parentReport ? (
+        <div className="space-y-3">
+          <HorseBasicInfoCard horse={createMinimalHorse(String(parentReport.id), parentHorseName)} />
+          <HorseAnalyticsTabs 
+            horse={createMinimalHorse(String(parentReport.id), parentHorseName)} 
+            defaultTab="last-report"
+            selectedReport={parentReport}
+          />
+        </div>
+      ) : (
+        <NoHorseSelected />
+      )}
 
       <HorseSearchDialog
         open={showSearchDialog}
         onOpenChange={setShowSearchDialog}
-        onSelectHorse={() => {}} // TODO: implement search selection
+        onSelectHorse={handleSearchSelect}
       />
     </div>
   );

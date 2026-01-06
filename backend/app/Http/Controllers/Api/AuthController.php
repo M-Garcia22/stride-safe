@@ -69,8 +69,6 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->firstOrFail();
         
-        // TODO: ask Matt about this
-        // Revoke previous tokens (keeping it for now to prevent multiple logins, I'll ask Matt about this)
         $user->tokens()->delete();
         
         $token = $user->createToken('auth-token')->plainTextToken;

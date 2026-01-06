@@ -48,25 +48,12 @@ export interface TrainerHorse {
 }
 
 /**
- * Simplified report data included with horse
+ * Report data included with horse - compatible with Report type
+ * Can be cast to Report by adding horseName and isNew
  */
-export interface HorseReport {
-  id: number;
-  entryCode: number;
-  date: string;
-  track: string;
-  raceNo: number;
-  distance: string;
-  surface: string;
+export interface HorseReport extends Omit<Report, 'horseName' | 'isNew' | 'welfareRiskCategory' | 'fatigueScore'> {
   welfareRiskCategory: number | null;
   fatigueScore: number | null;
-  welfareAlert: boolean;
-  condylarFx: boolean;
-  sesamoidFx: boolean;
-  leftFront: boolean;
-  rightFront: boolean;
-  bothFront: boolean;
-  hindLimb: boolean;
 }
 
 export interface Vet {
